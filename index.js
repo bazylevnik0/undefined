@@ -13,11 +13,25 @@ const renderer = new THREE.WebGLRenderer();
 document.body.appendChild( renderer.domElement );
 
 const Global = {
-	speed : 0.25
+	speed : 0.25,
+	game_status : true
 }
-//for test:
-const Meshes = []
-//
+
+const Track = {
+	time : 0,
+	pos  : 0
+}
+      Track.count = function() {
+		let delta 
+		let r1 = Math.random()*2
+		let r2 = Math.floor(Math.random())*2
+		if (r2 == 0) {
+		      r2 = -1
+		}else r2 =  1
+		    delta = r1 * r2
+		return delta
+       }
+
 const Plane  = function(color,x,z) {
 		this.geometry = new THREE.PlaneGeometry();
 		switch( color )  {
@@ -41,8 +55,8 @@ const Ground = {
 		data: [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ],
 		build: function() {
 			for (let j = 0; j <= 18; j++){
-				for (let i = 0; i <= 10 ; i++){
-					if(i >= 3 && i <= 7 || j % 2 == 0) {
+				for (let i = 0; i <= 20 ; i++){
+					if(i >= 7 && i <= 13 || j % 2 == 0) {
 						Ground.data[j].push({
 							type: "red",
 							obj :  new Plane("brown",Ground.convert_x(i),Ground.convert_z(j))
@@ -90,8 +104,13 @@ const Ground = {
 		push:  function() {
 			//for test:
 				Ground.data.push([])
-				for (let i = 0; i <= 10 ; i++){
-					if(i >= 3 && i <= 7 ) {
+					let delta = Track.count()
+					let delta_time = Math.random()*30
+					Track.time += (delta_time*Math.PI)/180
+					Track.pos = Math.sin(Track.time)*1.5 + delta
+				
+				for (let i = 0; i <= 20 ; i++){
+					if(i >= (Track.pos + 10)-3 && i <= (Track.pos + 10)+3 ) {
 						Ground.data[18][i] = {
 							type: "way",
 							obj :  new Plane("brown",Ground.convert_x(i),Ground.convert_z(18))
@@ -106,7 +125,7 @@ const Ground = {
 			//
 		},
 		convert_x: function(x) {
-			return x -5
+			return x -10
 		},
 		convert_z: function(z) {
 			return (z -5)*(-1)
@@ -149,7 +168,7 @@ let Car_mesh     = undefined
 scene.add(Car_mesh)	
 
 document.addEventListener("keydown", function(event){
-	console.log(event.code)
+	//console.log(event.code)
 	switch(event.code){
 		case "ArrowRight" : {
 			Car_mesh.rotation.y = (15*Math.PI)/180
@@ -178,16 +197,20 @@ document.addEventListener("keydown", function(event){
 	}
 })
 document.addEventListener("keyup", function(event){
-	console.log(event.code)
+	//console.log(event.code)
 	switch(event.code){
 		case "ArrowRight" : {
 			Car_mesh.rotation.y = 0
-			Car_mesh.position.x = 0
 		}break;
 		case "ArrowLeft" : {
 			Car_mesh.rotation.y = 0
-			Car_mesh.position.x = 0
 		}break;
+	}
+})
+let check = setInterval( function () {
+	if (Global.game_status == true) {
+		if(Car_mesh.position.x > 0) Car_mesh.position.x -= 0.025
+		if(Car_mesh.position.x < 0) Car_mesh.position.x += 0.025
 	}
 })
 //
