@@ -33,67 +33,82 @@ const Plane  = function(color,x,z) {
 		scene.add(this.mesh)
 	       }
 const Ground = {
-		 data: [
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ],
-				[ {},{},{},{},{},{},{},{},{},{} ]
-			],
+		data: [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ],
 		build: function() {
-			//for test:
-			for (let j = 5; j >= -15; j--){
-				for (let i = -5; i <= 5 ; i++){
-					if(i > -2 && i < 2) {
-						Meshes.push( new Plane("brown",i,j))
+			for (let j = 0; j <= 18; j++){
+				for (let i = 0; i <= 10 ; i++){
+					if(i >= 3 && i <= 7 || j % 2 == 0) {
+						Ground.data[j].push({
+							type: "red",
+							obj :  new Plane("brown",Ground.convert_x(i),Ground.convert_z(j))
+							})
 					} else {
-						
-						Meshes.push( new Plane("green",i,j))
+						Ground.data[j].push({
+							type: "green",
+							obj :  new Plane("green",Ground.convert_x(i),Ground.convert_z(j))
+							})
 					}
-				}		
+				}
 			}
-			//
 		},
 		move: {
 			status : false,
 			run : function() {
-
+				Ground.move.status = true
+				let timer = setInterval( function() {
+					if(Ground.move.status == false){
+						clearInterval(timer)
+					} else {
+						Ground.data.forEach( line=>{
+							line.forEach(  el=>{
+								el.obj.mesh.position.z += 0.25;
+							})
+						})
+						if (Ground.data[0][0].obj.mesh.position.z > 5){
+							Ground.shift()
+							Ground.push()
+						}
+					}
+				},25)
 			}
 		},
 		shift: function() {
-
+			//for test:
+				Ground.data[0].forEach(el=>{
+					scene.remove(el.obj.mesh)
+					delete el.obj
+					el = undefined
+				})
+				Ground.data.shift()
+			//
 		},
 		push:  function() {
-
+			//for test:
+				Ground.data.push([])
+				for (let i = 0; i <= 10 ; i++){
+					if(i >= 3 && i <= 7 ) {
+						Ground.data[18][i] = {
+							type: "way",
+							obj :  new Plane("brown",Ground.convert_x(i),Ground.convert_z(18))
+							}
+					} else {
+						Ground.data[18][i] = {
+							type: "way",
+							obj :  new Plane("green",Ground.convert_x(i),Ground.convert_z(18))
+							}
+					}
+				}
+			//
+		},
+		convert_x: function(x) {
+			return x -5
+		},
+		convert_z: function(z) {
+			return (z -5)*(-1)
 		}
 }
 Ground.build()
-
+Ground.move.run()
 //for test:
 let Sky_geometry = new THREE.PlaneGeometry()
 let Sky_material = new THREE.MeshBasicMaterial( { color: 0x0000ff } )
@@ -118,6 +133,7 @@ let Out_mesh     = undefined
 scene.add(Out_mesh)	
 //
 
+
 const Square = function (type) {
 			this.type = type
 			this.items = []
@@ -130,6 +146,7 @@ const Square = function (type) {
 
 
 const animate = function () {
+
 	requestAnimationFrame( animate );
 
 	//cube.rotation.x += 0.01;
