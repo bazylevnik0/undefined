@@ -12,6 +12,9 @@ const renderer = new THREE.WebGLRenderer();
       renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
+const Global = {
+	speed : 0.25
+}
 //for test:
 const Meshes = []
 //
@@ -32,6 +35,8 @@ const Plane  = function(color,x,z) {
 		this.mesh.position.z = z
 		scene.add(this.mesh)
 	       }
+
+
 const Ground = {
 		data: [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ],
 		build: function() {
@@ -61,7 +66,7 @@ const Ground = {
 					} else {
 						Ground.data.forEach( line=>{
 							line.forEach(  el=>{
-								el.obj.mesh.position.z += 0.25;
+								el.obj.mesh.position.z += Global.speed;
 							})
 						})
 						if (Ground.data[0][0].obj.mesh.position.z > 5){
@@ -69,7 +74,7 @@ const Ground = {
 							Ground.push()
 						}
 					}
-				},25)
+				},10)
 			}
 		},
 		shift: function() {
@@ -133,16 +138,60 @@ let Out_mesh     = undefined
 scene.add(Out_mesh)	
 //
 
+//for test:
+let Car_geometry = new THREE.BoxGeometry()
+let Car_material = new THREE.MeshBasicMaterial( { color: 0xffffff } )
+let Car_mesh     = undefined
+    Car_mesh = new THREE.Mesh( Car_geometry , Car_material )
+    Car_mesh.name = "Car"
+    Car_mesh.position.z = 4
+    Car_mesh.scale.set(1,1,2)
+scene.add(Car_mesh)	
 
-const Square = function (type) {
-			this.type = type
-			this.items = []
-		
-			switch (this.type) {
-				case "way"   :; break;
-				case "green" :; break; 
+document.addEventListener("keydown", function(event){
+	console.log(event.code)
+	switch(event.code){
+		case "ArrowRight" : {
+			Car_mesh.rotation.y = (15*Math.PI)/180
+			Car_mesh.position.x += 0.25
+		}break;
+		case "ArrowLeft" : {
+			Car_mesh.rotation.y = (-15*Math.PI)/180
+			Car_mesh.position.x += -0.25
+		}break;
+		case "ArrowUp" : {
+			Global.speed += 0.025
+			Car_mesh.position.z -= 0.1
+			if(Car_mesh.position.z < 3.0) {
+				Car_mesh.position.z += 0.1
+				Global.speed -= 0.025
 			}
-		}
+		}break;		
+		case "ArrowDown" : {
+			Global.speed -= 0.025
+			Car_mesh.position.z += 0.1
+			if(Car_mesh.position.z > 4.0) {
+				Car_mesh.position.z -= 0.1
+				Global.speed += 0.025
+			}
+		}break;
+	}
+})
+document.addEventListener("keyup", function(event){
+	console.log(event.code)
+	switch(event.code){
+		case "ArrowRight" : {
+			Car_mesh.rotation.y = 0
+			Car_mesh.position.x = 0
+		}break;
+		case "ArrowLeft" : {
+			Car_mesh.rotation.y = 0
+			Car_mesh.position.x = 0
+		}break;
+	}
+})
+//
+
 
 
 const animate = function () {
