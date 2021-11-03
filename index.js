@@ -8,12 +8,16 @@ const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.inner
       camera.position.y = 1;
       camera.rotation.x = (-10*Math.PI)/180
 
-const renderer = new THREE.WebGLRenderer();
-      renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+let canvas = document.getElementById("canvas")
+let context = canvas.getContext("webgl")
+
+const renderer = new THREE.WebGLRenderer( { canvas: canvas } );
+      renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
+      
+//document.body.appendChild( canvas );
 
 const Global = {
-	speed : 0.25,
+	speed : 1,
 	game_status : true
 }
 
@@ -43,29 +47,42 @@ const Plane  = function(color,x,z) {
 			}break; 
 		}
 		this.mesh = new THREE.Mesh( this.geometry , this.material );
-		this.mesh.name = ("ground_plane_"+Math.random()).slice(2,)
+		this.mesh.name = "ground_plane_"+(""+Math.random()).slice(2,)
 		this.mesh.rotation.x = (-90*Math.PI)/180 
 		this.mesh.position.x = x
 		this.mesh.position.z = z
+		if(color == "green") this.mesh.scale.set(1,1,)
+		else  this.mesh.scale.set(2,2,)
 		scene.add(this.mesh)
 	       }
 
+var brown = new Plane("brown",6,0)
+var green = new Plane("green",6,0)
+console.log(brown,green)
 
 const Ground = {
 		data: [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ],
 		build: function() {
 			for (let j = 0; j <= 18; j++){
-				for (let i = 0; i <= 20 ; i++){
-					if(i >= 7 && i <= 13 || j % 2 == 0) {
-						Ground.data[j].push({
+				for (let i = 0; i <= 18 ; i++){
+					if(i >= 8 && i <= 12 || j % 2 == 0) {
+						let temp = {
 							type: "red",
-							obj :  new Plane("brown",Ground.convert_x(i),Ground.convert_z(j))
-							})
+							obj :  brown.mesh.clone()
+						}
+						Ground.data[j].push(temp)
+						temp.obj.position.x = Ground.convert_x(i)
+						temp.obj.position.z = Ground.convert_z(j)
+						scene.add(temp.obj)
 					} else {
-						Ground.data[j].push({
+						let temp = {
 							type: "green",
-							obj :  new Plane("green",Ground.convert_x(i),Ground.convert_z(j))
-							})
+							obj :  green.mesh.clone()
+						}
+						Ground.data[j].push(temp)
+						temp.obj.position.x = Ground.convert_x(i)
+						temp.obj.position.z = Ground.convert_z(j)
+						scene.add(temp.obj)
 					}
 				}
 			}
@@ -80,48 +97,90 @@ const Ground = {
 					} else {
 						Ground.data.forEach( line=>{
 							line.forEach(  el=>{
-								el.obj.mesh.position.z += Global.speed;
+								el.obj.position.z += Global.speed;
 							})
 						})
-						if (Ground.data[0][0].obj.mesh.position.z > 5){
-							Ground.shift()
+						if (Ground.data[0][0].obj.position.z > 5){
 							Ground.push()
+							Ground.shift()	
 						}
 					}
-				},10)
+				},100)
 			}
 		},
 		shift: function() {
 			//for test:
+				let temp = Ground.data[0]  
+				temp.forEach(el=>{
+					scene.remove(el.obj)
+					el.obj = null
+					delete el.obj
+					el.type = null
+					delete el.type
+					el = null
+				})
+				for (let i = 0; i < temp.length; i++){
+					delete temp[i]
+				}
+				Ground.data[0] = null
+				Ground.data.shift()
+
+				/*
 				Ground.data[0].forEach(el=>{
+					scene.remove(el.obj.geometry)
+					scene.remove(el.obj.material)
 					scene.remove(el.obj.mesh)
 					delete el.obj
 					el = undefined
 				})
+				Ground.data[0] = undefined
 				Ground.data.shift()
-			//
+				*/
+			//)
 		},
 		push:  function() {
 			//for test:
-				Ground.data.push([])
+				Ground.data[18] = []
 					let delta = Track.count()
 					let delta_time = Math.random()*30
 					Track.time += (delta_time*Math.PI)/180
-					Track.pos = Math.sin(Track.time)*1.5 + delta
-				
-				for (let i = 0; i <= 20 ; i++){
+					Track.time = Track.time % 4
+					Track.pos = Math.sin(Track.time)*2 + delta
+				let temp = []
+				for (let i = 0; i <= 18 ; i++){
 					if(i >= (Track.pos + 10)-3 && i <= (Track.pos + 10)+3 ) {
-						Ground.data[18][i] = {
+						temp[i] = {
+							type: "way",
+							obj :  brown.mesh.clone()
+							}
+						temp[i].obj.position.x = Ground.convert_x(i)
+						temp[i].obj.position.z = Ground.convert_z(18)
+						scene.add(temp[i].obj)
+					} else {
+						temp[i] = {
+							type: "green",
+							obj :  green.mesh.clone()
+							}
+						temp[i].obj.position.x = Ground.convert_x(i)
+						temp[i].obj.position.z = Ground.convert_z(18)
+						scene.add(temp[i].obj)
+					}
+				
+					/*
+					if(i >= (Track.pos + 10)-3 && i <= (Track.pos + 10)+3 ) {
+						temp[i] = {
 							type: "way",
 							obj :  new Plane("brown",Ground.convert_x(i),Ground.convert_z(18))
 							}
 					} else {
-						Ground.data[18][i] = {
-							type: "way",
+						temp[i] = {
+							type: "green",
 							obj :  new Plane("green",Ground.convert_x(i),Ground.convert_z(18))
 							}
 					}
+					*/
 				}
+				Ground.data[18] = temp;
 			//
 		},
 		convert_x: function(x) {
