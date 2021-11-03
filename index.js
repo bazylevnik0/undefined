@@ -16,6 +16,12 @@ const renderer = new THREE.WebGLRenderer( { canvas: canvas } );
       
 //document.body.appendChild( canvas );
 
+const Menu = {}
+const Select_car ={}
+const Select_level ={}
+const Game = {}
+
+//game
 const Global = {
 	speed : 1,
 	game_status : true
@@ -89,8 +95,19 @@ const Ground = {
 		},
 		move: {
 			status : false,
+			direction : "straight",
 			run : function() {
 				Ground.move.status = true
+				for (let i = 1; i < 7; i ++) {
+					let time = Math.random()*10000 + 5000
+					let seed = Math.floor(Math.random()*2)
+					let dir
+					switch (seed) {
+						case 0 : dir = "left";  break;
+						case 1 : dir = "right"; break;
+					}
+					setTimeout( ()=>{Ground.move.direction = dir} , time * i  ) 
+				}
 				let timer = setInterval( function() {
 					if(Ground.move.status == false){
 						clearInterval(timer)
@@ -101,8 +118,35 @@ const Ground = {
 							})
 						})
 						if (Ground.data[0][0].obj.position.z > 5){
-							Ground.push()
-							Ground.shift()	
+							switch (Ground.move.direction) {
+								case "straight" : {
+									if ( camera.rotation.y < 0) {
+										camera.rotation.y += 0.005
+									}else if(camera.rotation.y >= 0) {
+										camera.rotation.y -= 0.005
+									}
+									Ground.push("straight")
+									Ground.shift()
+								}break;	
+								case "left" : {
+									if ( camera.rotation.y < -0.25) {
+										camera.rotation.y += 0.025
+									}else if(camera.rotation.y > -0.25) {
+										camera.rotation.y -= 0.025
+									}
+									Ground.push("left")
+									Ground.shift()
+								}break;	
+								case "right" : {
+									if ( camera.rotation.y < 0.25) {
+										camera.rotation.y += 0.025
+									}else if(camera.rotation.y > 0.25) {
+										camera.rotation.y -= 0.025
+									}
+									Ground.push("right")
+									Ground.shift()
+								}break;
+							}
 						}
 					}
 				},100)
@@ -124,21 +168,9 @@ const Ground = {
 				}
 				Ground.data[0] = null
 				Ground.data.shift()
-
-				/*
-				Ground.data[0].forEach(el=>{
-					scene.remove(el.obj.geometry)
-					scene.remove(el.obj.material)
-					scene.remove(el.obj.mesh)
-					delete el.obj
-					el = undefined
-				})
-				Ground.data[0] = undefined
-				Ground.data.shift()
-				*/
-			//)
+			//
 		},
-		push:  function() {
+		push:  function(direction) {
 			//for test:
 				Ground.data[18] = []
 					let delta = Track.count()
@@ -146,6 +178,14 @@ const Ground = {
 					Track.time += (delta_time*Math.PI)/180
 					Track.time = Track.time % 4
 					Track.pos = Math.sin(Track.time)*2 + delta
+				if(direction == "left")  {
+					Track.pos < 5  ? Track.pos = 4  : false
+					setTimeout( () => {Ground.move.direction = "straight"} , 3000 )
+			        }  
+				if(direction == "right")  {
+					Track.pos > -5  ? Track.pos = -4  : false
+					setTimeout( () => {Ground.move.direction = "straight"} , 3000 )
+			        }  
 				let temp = []
 				for (let i = 0; i <= 18 ; i++){
 					if(i >= (Track.pos + 10)-3 && i <= (Track.pos + 10)+3 ) {
@@ -165,20 +205,6 @@ const Ground = {
 						temp[i].obj.position.z = Ground.convert_z(18)
 						scene.add(temp[i].obj)
 					}
-				
-					/*
-					if(i >= (Track.pos + 10)-3 && i <= (Track.pos + 10)+3 ) {
-						temp[i] = {
-							type: "way",
-							obj :  new Plane("brown",Ground.convert_x(i),Ground.convert_z(18))
-							}
-					} else {
-						temp[i] = {
-							type: "green",
-							obj :  new Plane("green",Ground.convert_x(i),Ground.convert_z(18))
-							}
-					}
-					*/
 				}
 				Ground.data[18] = temp;
 			//
@@ -199,7 +225,7 @@ let Sky_mesh     = undefined
     Sky_mesh = new THREE.Mesh( Sky_geometry , Sky_material )
     Sky_mesh.name = "Sky"
     Sky_mesh.position.z = -16
-    Sky_mesh.scale.set(100,100,)
+    Sky_mesh.scale.set(150,150,)
 scene.add(Sky_mesh)	
 //
 
@@ -210,7 +236,7 @@ let Out_material = new THREE.MeshBasicMaterial( { color: 0xffff00 } )
 let Out_mesh     = undefined
     Out_mesh = new THREE.Mesh( Out_geometry , Out_material )
     Out_mesh.name = "out"
-    Out_mesh.scale.set(100,100,)
+    Out_mesh.scale.set(150,150,)
     Out_mesh.position.y = -0.1
     Out_mesh.rotation.x = (-90*Math.PI)/180 
 scene.add(Out_mesh)	
@@ -268,8 +294,8 @@ document.addEventListener("keyup", function(event){
 })
 let check = setInterval( function () {
 	if (Global.game_status == true) {
-		if(Car_mesh.position.x > 0) Car_mesh.position.x -= 0.025
-		if(Car_mesh.position.x < 0) Car_mesh.position.x += 0.025
+		if(Car_mesh.position.x > 0) Car_mesh.position.x -= 0.005
+		if(Car_mesh.position.x < 0) Car_mesh.position.x += 0.005
 	}
 })
 //
