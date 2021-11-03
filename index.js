@@ -16,10 +16,10 @@ const renderer = new THREE.WebGLRenderer( { canvas: canvas } );
       
 //document.body.appendChild( canvas );
 
-const Menu = {}
-const Select_car ={}
-const Select_level ={}
-const Game = {}
+const Menu         = {}
+const Select_car   = {}
+const Select_level = {}
+const Game         = {}
 
 //game
 const Global = {
@@ -51,6 +51,9 @@ const Plane  = function(color,x,z) {
 			case "green" : {
 				this.material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 			}break; 
+			case "black" : {
+				this.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+			}break; 
 		}
 		this.mesh = new THREE.Mesh( this.geometry , this.material );
 		this.mesh.name = "ground_plane_"+(""+Math.random()).slice(2,)
@@ -62,9 +65,10 @@ const Plane  = function(color,x,z) {
 		scene.add(this.mesh)
 	       }
 
-var brown = new Plane("brown",6,0)
-var green = new Plane("green",6,0)
-console.log(brown,green)
+var brown = new Plane("brown",0,6)
+var green = new Plane("green",0,6)
+var black = new Plane("black",0,6)
+
 
 const Ground = {
 		data: [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ],
@@ -99,11 +103,11 @@ const Ground = {
 			run : function() {
 				Ground.move.status = true
 				for (let i = 1; i < 7; i ++) {
-					let time = Math.random()*10000 + 5000
+					let time = Math.random()*5000 + 5000
 					let seed = Math.floor(Math.random()*2)
 					let dir
 					switch (seed) {
-						case 0 : dir = "left";  break;
+						case 0 : dir = "left" ; break;
 						case 1 : dir = "right"; break;
 					}
 					setTimeout( ()=>{Ground.move.direction = dir} , time * i  ) 
@@ -206,6 +210,64 @@ const Ground = {
 						scene.add(temp[i].obj)
 					}
 				}
+				//
+				let seed_a = Math.floor(Math.random()*30)
+				if  (seed_a == 0) {
+					let seed_a_dir = Math.floor(Math.random()*2)
+					switch (seed_a_dir) {
+						case 0 : {					
+							temp[9].obj.material = black.mesh.material
+							temp[8].obj.material = black.mesh.material
+							temp[7].obj.material = black.mesh.material
+							temp[6].obj.material = black.mesh.material
+							temp[5].obj.material = black.mesh.material
+							temp[9].type =	temp[8].type =	temp[7].type =	temp[6].type = temp[5].type = "black"
+						}break;
+						case 1 : {
+							temp[10].obj.material = black.mesh.material
+							temp[11].obj.material = black.mesh.material
+							temp[12].obj.material = black.mesh.material
+							temp[13].obj.material = black.mesh.material
+							temp[14].obj.material = black.mesh.material
+							temp[10].type = temp[11].type =	temp[12].type =	temp[13].type =	temp[14].type = "black"
+						}break;
+					} 
+				}
+				let seed_b = Math.floor(Math.random()*20)
+				if  (seed_b == 0) {
+					let seed_a_dir = Math.floor(Math.random()*2)
+					switch (seed_a_dir) {
+						case 0 : {					
+							let seed_a_place = Math.floor(Math.random()*8)+4
+							temp[0+seed_a_place].obj.material = black.mesh.material
+							temp[1+seed_a_place].obj.material = black.mesh.material
+							temp[0+seed_a_place].type =	temp[1+seed_a_place].type = "black"
+						}break;
+						case 1 : {						
+							let seed_a_place = Math.floor(Math.random()*8)+4
+							temp[18-seed_a_place].obj.material = black.mesh.material
+							temp[17-seed_a_place].obj.material = black.mesh.material
+							temp[18-seed_a_place].type =	temp[17-seed_a_place].type = "black"
+						}break;
+					} 
+				}
+				let seed_c = Math.floor(Math.random()*10)
+				if  (seed_c == 0) {
+					let seed_a_dir = Math.floor(Math.random()*2)
+					switch (seed_a_dir) {
+						case 0 : {					
+							let seed_a_place = Math.floor(Math.random()*8)+8
+							temp[0+seed_a_place].obj.material = black.mesh.material
+							temp[0+seed_a_place].type = "black"
+						}break;
+						case 1 : {						
+							let seed_a_place = Math.floor(Math.random()*8)+8
+							temp[18-seed_a_place].obj.material = black.mesh.material
+							temp[18-seed_a_place].type = "black"
+						}break;
+					} 
+				}
+			
 				Ground.data[18] = temp;
 			//
 		},
