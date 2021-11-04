@@ -40,12 +40,48 @@ const Plane  = function(color,x,z,w,h,v) {
 		scene.add(this.obj)
 	       }
 
+const Box  = function(color,x,y,z,w,h,d) {
+		this.geometry = new THREE.BoxGeometry();
+		switch( color )  {
+			case "brown" : {
+				this.material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+			}break; 
+			case "green" : {
+				this.material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+			}break; 
+			case "black" : {
+				this.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+			}break; 
+		}
+		this.obj = new THREE.Mesh( this.geometry , this.material );
+		this.obj.name = "ground_box_"+(""+Math.random()).slice(2,)
+		this.obj.position.x = x
+		this.obj.position.y = y
+		this.obj.position.z = z
+		if(w)this.obj.scale.x = w
+		if(h)this.obj.scale.y = h
+		if(d)this.obj.scale.z = d
+		scene.add(this.obj)
+	       }
 
+const Obj = function(type,obj,items) {
+	this.type = type;
+	this.obj  = obj;
+	this.items = items;
+	this.items.forEach( el=> { scene.add(el) })
+}
 //preload
-var brown = new Plane("brown",0,6,1,1,true)
-var green = new Plane("green",0,6,1,1,true)
-var black = new Plane("black",0,6,1,1,true)
-
+var brown   = new Plane("brown",0,6,2,1,true)
+var green   = new Plane("green",0,6,1,1,true)
+var black   = new Plane("black",0,6,1,1,true)
+var black_a = new Box("black",0,0,6,1,7,1  ,)
+var black_b = new Box("black",0,0,6,1,3,1  ,)
+var black_c = new Box("black",0,0,6,1,1,1,)
+var green_a = new Box("green",0,0,6,6,6,6,)
+var green_b = new Box("green",0,0,6,3,3,3,)
+    green_a.material.transparent = true
+    green_b.material.transparent = true
+   
 
 //structure
 const Movie        = {}
@@ -123,19 +159,13 @@ const Game         = {}
 			for (let j = 0; j <= 18; j++){
 				for (let i = 0; i <= 18 ; i++){
 					if(i >= 8 && i <= 12 || j % 2 == 0) {
-						let temp = {
-							type: "red",
-							obj :  brown.obj.clone()
-						}
+						let temp = new Obj("way", brown.obj.clone(),[])
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
 						scene.add(temp.obj)
 					} else {
-						let temp = {
-							type: "green",
-							obj :  green.obj.clone()
-						}
+						let temp = new Obj("green", green.obj.clone(),[])
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
@@ -166,6 +196,9 @@ const Game         = {}
 						Game.local.ground.data.forEach( line=>{
 							line.forEach(  el=>{
 								el.obj.position.z += Game.local.speed;
+								el.items.forEach( item=>{
+									item.position.z += Game.local.speed;							
+								})
 							})
 						})
 						if (Game.local.ground.data[0][0].obj.position.z > 5){
@@ -178,6 +211,8 @@ const Game         = {}
 									}
 									Game.local.ground.move.push("straight")
 									Game.local.ground.move.shift()
+									green_a.material.opacity < 1 ? green_a.material.opacity += 0.05 : false
+									green_a.material.opacity < 1 ? green_b.material.opacity += 0.05 : false
 								}break;	
 								case "left" : {
 									if ( camera.rotation.y < -0.25) {
@@ -187,6 +222,8 @@ const Game         = {}
 									}
 									Game.local.ground.move.push("left")
 									Game.local.ground.move.shift()
+									green_a.material.opacity > 0.4 ? green_a.material.opacity -= 0.1 : false
+									green_a.material.opacity > 0.4 ? green_b.material.opacity -= 0.1 : false
 								}break;	
 								case "right" : {
 									if ( camera.rotation.y < 0.25) {
@@ -195,7 +232,9 @@ const Game         = {}
 										camera.rotation.y -= 0.025
 									}
 									Game.local.ground.move.push("right")
-									Game.local.ground.move.shift()
+									Game.local.ground.move.shift()							
+									green_a.material.opacity > 0.4 ? green_a.material.opacity -= 0.1 : false
+									green_a.material.opacity > 0.4 ? green_b.material.opacity -= 0.1 : false
 								}break;
 							}
 						}
@@ -211,6 +250,15 @@ const Game         = {}
 					delete el.obj
 					el.type = null
 					delete el.type
+					el.items.forEach(item=>{
+						scene.remove(item)
+						item = null
+					})
+					for(let i = 0; i < el.items.length; i++){
+						delete el.items[i]
+					}
+					el.items = null
+					delete el.items
 					el = null
 				})
 				for (let i = 0; i < temp.length; i++){
@@ -239,73 +287,158 @@ const Game         = {}
 				let temp = []
 				for (let i = 0; i <= 18 ; i++){
 					if(i >= (Game.local.track.pos + 10)-3 && i <= (Game.local.track.pos + 10)+3 ) {
-						temp[i] = {
-							type: "way",
-							obj :  brown.obj.clone()
-							}
+						temp[i] = new Obj("way", brown.obj.clone(), [])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
 						scene.add(temp[i].obj)
 					} else {
-						temp[i] = {
-							type: "green",
-							obj :  green.obj.clone()
-							}
+						temp[i] = new Obj("green", green.obj.clone(), [])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
 						scene.add(temp[i].obj)
 					}
 				}
-				//
-				let seed_a = Math.floor(Math.random()*30)
+				//add black a
+				let seed_a = Math.floor(Math.random()*15)
+				if(Game.local.ground.move.direction !== "straight") seed_a = 1
 				if  (seed_a == 0) {
-					let seed_a_dir = Math.floor(Math.random()*2)
+					let seed_a_dir = Math.floor(Math.random()*15)
 					switch (seed_a_dir) {
 						case 0 : {					
-							temp[9].obj.material = temp[8].obj.material = temp[7].obj.material = temp[6].obj.material = temp[5].obj.material = black.obj.material
-							temp[9].type =	temp[8].type =	temp[7].type =	temp[6].type = temp[5].type = "black"
+							temp[9].obj.material = temp[8].obj.material = temp[7].obj.material = temp[6].obj.material = temp[5].obj.material = temp[4].obj.material = black.obj.material
+							temp[9].type =	temp[8].type =	temp[7].type =	temp[6].type = temp[5].type = temp[4].type = "black"
+							temp[9].items.unshift( black_a.obj.clone() )
+							temp[8].items.unshift( black_a.obj.clone() )
+							temp[7].items.unshift( black_a.obj.clone() )
+							temp[6].items.unshift( black_a.obj.clone() )
+							temp[5].items.unshift( black_a.obj.clone() )
+							temp[4].items.unshift( black_a.obj.clone() )
+							temp[9].items[0].position.x = Game.local.ground.move.convert_x(9)
+							temp[8].items[0].position.x = Game.local.ground.move.convert_x(8)
+							temp[7].items[0].position.x = Game.local.ground.move.convert_x(7)
+							temp[6].items[0].position.x = Game.local.ground.move.convert_x(6)
+							temp[5].items[0].position.x = Game.local.ground.move.convert_x(5)
+							temp[4].items[0].position.x = Game.local.ground.move.convert_x(4)
+							temp[9].items[0].position.z = temp[8].items[0].position.z = temp[7].items[0].position.z = temp[6].items[0].position.z = temp[5].items[0].position.z = temp[4].items[0].position.z =  Game.local.ground.move.convert_z(18)
+							scene.add(temp[9].items[0],
+								  temp[8].items[0],
+								  temp[7].items[0],
+								  temp[6].items[0],
+								  temp[5].items[0],
+								  temp[4].items[0])
 						}break;
 						case 1 : {
-							temp[10].obj.material =	temp[11].obj.material = temp[12].obj.material = temp[13].obj.material = temp[14].obj.material = black.obj.material
-							temp[10].type = temp[11].type =	temp[12].type =	temp[13].type =	temp[14].type = "black"
+							temp[10].obj.material = temp[11].obj.material = temp[12].obj.material = temp[13].obj.material = temp[14].obj.material = temp[15].obj.material = black.obj.material
+							temp[10].type =	temp[11].type =	temp[12].type =	temp[13].type = temp[14].type = temp[15].type = "black"
+							temp[10].items.unshift( black_a.obj.clone() )
+							temp[11].items.unshift( black_a.obj.clone() )
+							temp[12].items.unshift( black_a.obj.clone() )
+							temp[13].items.unshift( black_a.obj.clone() )
+							temp[14].items.unshift( black_a.obj.clone() )
+							temp[15].items.unshift( black_a.obj.clone() )
+							temp[10].items[0].position.x = Game.local.ground.move.convert_x(10)
+							temp[11].items[0].position.x = Game.local.ground.move.convert_x(11)
+							temp[12].items[0].position.x = Game.local.ground.move.convert_x(12)
+							temp[13].items[0].position.x = Game.local.ground.move.convert_x(13)
+							temp[14].items[0].position.x = Game.local.ground.move.convert_x(14)
+							temp[15].items[0].position.x = Game.local.ground.move.convert_x(15)
+							temp[10].items[0].position.z = temp[11].items[0].position.z = temp[12].items[0].position.z = temp[13].items[0].position.z = temp[14].items[0].position.z = temp[15].items[0].position.z =  Game.local.ground.move.convert_z(18)
+							scene.add(temp[10].items[0],
+								  temp[11].items[0],
+								  temp[12].items[0],
+								  temp[13].items[0],
+								  temp[14].items[0],
+								  temp[15].items[0])
 						}break;
 					} 
 				}
-				let seed_b = Math.floor(Math.random()*20)
+				//add black b
+				let seed_b = Math.floor(Math.random()*10)
+				if(Game.local.ground.move.direction !== "straight") seed_b = 1
 				if  (seed_b == 0) {
-					let seed_a_dir = Math.floor(Math.random()*2)
-					switch (seed_a_dir) {
+					let seed_b_dir = Math.floor(Math.random()*2)
+					switch (seed_b_dir) {
 						case 0 : {					
-							let seed_a_place = Math.floor(Math.random()*8)+4
-							temp[0+seed_a_place].obj.material = black.obj.material
-							temp[1+seed_a_place].obj.material = black.obj.material
-							temp[0+seed_a_place].type =	temp[1+seed_a_place].type = "black"
+							let seed_b_place = Math.floor(Math.random()*8)+4
+							temp[0+seed_b_place].obj.material = black.obj.material
+							temp[1+seed_b_place].obj.material = black.obj.material			
+							temp[0+seed_b_place].type =	temp[1+seed_b_place].type = "black"
+							temp[0+seed_b_place].items.unshift( black_b.obj.clone() )
+							temp[1+seed_b_place].items.unshift( black_b.obj.clone() )
+							temp[0+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_b_place)
+							temp[1+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(1+seed_b_place)
+							temp[0+seed_b_place].items[0].position.z = temp[1+seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
+							scene.add(temp[0+seed_b_place].items[0],
+								  temp[1+seed_b_place].items[0])
 						}break;
 						case 1 : {						
-							let seed_a_place = Math.floor(Math.random()*8)+4
-							temp[18-seed_a_place].obj.material = black.obj.material
-							temp[17-seed_a_place].obj.material = black.obj.material
-							temp[18-seed_a_place].type =	temp[17-seed_a_place].type = "black"
+							let seed_b_place = Math.floor(Math.random()*8)+4
+							temp[18-seed_b_place].obj.material = black.obj.material
+							temp[17-seed_b_place].obj.material = black.obj.material
+							temp[18-seed_b_place].type =	temp[17-seed_b_place].type = "black"
+							temp[18-seed_b_place].items.unshift( black_b.obj.clone() )
+							temp[17-seed_b_place].items.unshift( black_b.obj.clone() )
+							temp[18-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_b_place)
+							temp[17-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(17-seed_b_place)
+							temp[18-seed_b_place].items[0].position.z = temp[17-seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
+							scene.add(temp[18-seed_b_place].items[0],
+								  temp[17-seed_b_place].items[0])
+					
 						}break;
 					} 
 				}
-				let seed_c = Math.floor(Math.random()*10)
+				//add black c
+				let seed_c = Math.floor(Math.random()*5)
+				if(Game.local.ground.move.direction !== "straight") seed_c = 1
 				if  (seed_c == 0) {
-					let seed_a_dir = Math.floor(Math.random()*2)
-					switch (seed_a_dir) {
+					let seed_c_dir = Math.floor(Math.random()*2)
+					switch (seed_c_dir) {
 						case 0 : {					
-							let seed_a_place = Math.floor(Math.random()*8)+8
-							temp[0+seed_a_place].obj.material = black.obj.material
-							temp[0+seed_a_place].type = "black"
+							let seed_c_place = Math.floor(Math.random()*8)+8
+							temp[0+seed_c_place].obj.material = black.obj.material
+							temp[0+seed_c_place].type = "black"
+							temp[0+seed_c_place].items.unshift( black_c.obj.clone() )
+							temp[0+seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_c_place)
+							temp[0+seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
+							scene.add(temp[0+seed_c_place].items[0])
 						}break;
 						case 1 : {						
-							let seed_a_place = Math.floor(Math.random()*8)+8
-							temp[18-seed_a_place].obj.material = black.obj.material
-							temp[18-seed_a_place].type = "black"
+							let seed_c_place = Math.floor(Math.random()*8)+8
+							temp[18-seed_c_place].obj.material = black.obj.material
+							temp[18-seed_c_place].type = "black"
+							temp[18-seed_c_place].items.unshift( black_c.obj.clone() )			
+							temp[18-seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_c_place)
+							temp[18-seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
+							scene.add(temp[18-seed_c_place].items[0])					
 						}break;
 					} 
 				}
-			
+				
+				//add green 3d
+				let k; if(Game.local.ground.move.direction!=="straight") k = 0.5
+				       else k = 3
+				temp.forEach( el=> {
+					if(el.type == "green") {
+						let rand = Math.floor(Math.random()*k*10*3)
+						if (rand == 0){
+							el.items.unshift( green_a.obj.clone() )
+							el.items[0].position.x = el.obj.position.x * 2
+							el.items[0].position.z = Game.local.ground.move.convert_z(18)
+							scene.add(el.items[0])
+						}
+					}
+				})
+				temp.forEach( el=> {
+					if(el.type == "green"){
+						let rand = Math.floor(Math.random()*k*10)
+						if (rand == 0){
+							el.items.unshift( green_b.obj.clone() )
+							el.items[0].position.x = el.obj.position.x * 2
+							el.items[0].position.z = Game.local.ground.move.convert_z(18)
+							scene.add(el.items[0])
+						}
+					}
+				})
 				Game.local.ground.data[18] = temp;
 			//
 			},
@@ -377,19 +510,19 @@ document.addEventListener("keydown", function(event){
 			Game.global.car.obj.position.x += -0.25
 		}break;
 		case "ArrowUp" : {
-			Game.local.speed += 0.025
+			Game.local.speed += 0.5
 			Game.global.car.obj.position.z -= 0.1
 			if(Game.global.car.obj.position.z < 3.0) {
 				Game.global.car.obj.position.z += 0.1
-				Game.local.speed -= 0.025
+				Game.local.speed -= 0.5
 			}
 		}break;		
 		case "ArrowDown" : {
-			Game.local.speed -= 0.025
+			Game.local.speed -= 0.5
 			Game.global.car.obj.position.z += 0.1
 			if(Game.global.car.obj.position.z > 4.0) {
 				Game.global.car.obj.position.z -= 0.1
-				Game.local.speed += 0.025
+				Game.local.speed += 0.5
 			}
 		}break;
 	}
