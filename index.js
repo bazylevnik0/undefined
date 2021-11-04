@@ -1,7 +1,8 @@
 import * as THREE     from "/build/three.module.js"
 import { GLTFLoader } from '/build/GLTFLoader.js';
 
-console.log("script")
+var first_check = true
+
 const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
       camera.position.z = 6;
@@ -70,18 +71,6 @@ const Obj = function(type,obj,items) {
 	this.items = items;
 	this.items.forEach( el=> { scene.add(el) })
 }
-//preload
-var brown   = new Plane("brown",0,6,2,1,true)
-var green   = new Plane("green",0,6,1,1,true)
-var black   = new Plane("black",0,6,1,1,true)
-var black_a = new Box("black",0,0,6,1,7,1  ,)
-var black_b = new Box("black",0,0,6,1,3,1  ,)
-var black_c = new Box("black",0,0,6,1,1,1,)
-var green_a = new Box("green",0,0,6,6,6,6,)
-var green_b = new Box("green",0,0,6,3,3,3,)
-    green_a.material.transparent = true
-    green_b.material.transparent = true
-   
 
 //structure
 const Movie        = {}
@@ -119,7 +108,8 @@ const Game         = {}
 
       //g
       Game.global = {
-		status : true
+		status : true,
+		score  : 0
       }
 		
          Game.global.car = {
@@ -135,7 +125,8 @@ const Game         = {}
 	    }
       //l
       Game.local  = {
-		speed : 1
+		speed : 0,
+		limit : 2,
       }
          Game.local.track   = {
 		   time : 0,
@@ -239,6 +230,8 @@ const Game         = {}
 							}
 						}
 					}
+					Game.global.score++
+					Game.local.speed <  Game.local.limit ? Game.local.speed += 0.025 : false
 				},100)
 			},
 			shift: function() {
@@ -299,14 +292,14 @@ const Game         = {}
 					}
 				}
 				//add black a
-				let seed_a = Math.floor(Math.random()*15)
+				let seed_a = Math.floor(Math.random()*50)
 				if(Game.local.ground.move.direction !== "straight") seed_a = 1
 				if  (seed_a == 0) {
 					let seed_a_dir = Math.floor(Math.random()*15)
 					switch (seed_a_dir) {
 						case 0 : {					
 							temp[9].obj.material = temp[8].obj.material = temp[7].obj.material = temp[6].obj.material = temp[5].obj.material = temp[4].obj.material = black.obj.material
-							temp[9].type =	temp[8].type =	temp[7].type =	temp[6].type = temp[5].type = temp[4].type = "black"
+							temp[9].type =	temp[8].type =	temp[7].type =	temp[6].type = temp[5].type = temp[4].type = "black_a"
 							temp[9].items.unshift( black_a.obj.clone() )
 							temp[8].items.unshift( black_a.obj.clone() )
 							temp[7].items.unshift( black_a.obj.clone() )
@@ -329,7 +322,7 @@ const Game         = {}
 						}break;
 						case 1 : {
 							temp[10].obj.material = temp[11].obj.material = temp[12].obj.material = temp[13].obj.material = temp[14].obj.material = temp[15].obj.material = black.obj.material
-							temp[10].type =	temp[11].type =	temp[12].type =	temp[13].type = temp[14].type = temp[15].type = "black"
+							temp[10].type =	temp[11].type =	temp[12].type =	temp[13].type = temp[14].type = temp[15].type = "black_a"
 							temp[10].items.unshift( black_a.obj.clone() )
 							temp[11].items.unshift( black_a.obj.clone() )
 							temp[12].items.unshift( black_a.obj.clone() )
@@ -353,7 +346,7 @@ const Game         = {}
 					} 
 				}
 				//add black b
-				let seed_b = Math.floor(Math.random()*10)
+				let seed_b = Math.floor(Math.random()*30)
 				if(Game.local.ground.move.direction !== "straight") seed_b = 1
 				if  (seed_b == 0) {
 					let seed_b_dir = Math.floor(Math.random()*2)
@@ -362,7 +355,7 @@ const Game         = {}
 							let seed_b_place = Math.floor(Math.random()*8)+4
 							temp[0+seed_b_place].obj.material = black.obj.material
 							temp[1+seed_b_place].obj.material = black.obj.material			
-							temp[0+seed_b_place].type =	temp[1+seed_b_place].type = "black"
+							temp[0+seed_b_place].type =	temp[1+seed_b_place].type = "black_b"
 							temp[0+seed_b_place].items.unshift( black_b.obj.clone() )
 							temp[1+seed_b_place].items.unshift( black_b.obj.clone() )
 							temp[0+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_b_place)
@@ -375,7 +368,7 @@ const Game         = {}
 							let seed_b_place = Math.floor(Math.random()*8)+4
 							temp[18-seed_b_place].obj.material = black.obj.material
 							temp[17-seed_b_place].obj.material = black.obj.material
-							temp[18-seed_b_place].type =	temp[17-seed_b_place].type = "black"
+							temp[18-seed_b_place].type =	temp[17-seed_b_place].type = "black_b"
 							temp[18-seed_b_place].items.unshift( black_b.obj.clone() )
 							temp[17-seed_b_place].items.unshift( black_b.obj.clone() )
 							temp[18-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_b_place)
@@ -388,7 +381,7 @@ const Game         = {}
 					} 
 				}
 				//add black c
-				let seed_c = Math.floor(Math.random()*5)
+				let seed_c = Math.floor(Math.random()*10)
 				if(Game.local.ground.move.direction !== "straight") seed_c = 1
 				if  (seed_c == 0) {
 					let seed_c_dir = Math.floor(Math.random()*2)
@@ -396,7 +389,7 @@ const Game         = {}
 						case 0 : {					
 							let seed_c_place = Math.floor(Math.random()*8)+8
 							temp[0+seed_c_place].obj.material = black.obj.material
-							temp[0+seed_c_place].type = "black"
+							temp[0+seed_c_place].type = "black_c"
 							temp[0+seed_c_place].items.unshift( black_c.obj.clone() )
 							temp[0+seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_c_place)
 							temp[0+seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
@@ -405,7 +398,7 @@ const Game         = {}
 						case 1 : {						
 							let seed_c_place = Math.floor(Math.random()*8)+8
 							temp[18-seed_c_place].obj.material = black.obj.material
-							temp[18-seed_c_place].type = "black"
+							temp[18-seed_c_place].type = "black_c"
 							temp[18-seed_c_place].items.unshift( black_c.obj.clone() )			
 							temp[18-seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_c_place)
 							temp[18-seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
@@ -477,6 +470,41 @@ const Game         = {}
 
 
 
+//preload
+var brown , green , black , black_a , black_b , black_c , green_a , green_b
+function preload(level) {
+	brown   = new Plane("brown",0,6,2,1,true)
+    	green   = new Plane("green",0,6,1,1,true)
+   	black   = new Plane("black",0,6,1,1,true)
+    	black_a = new Box("black",0,0,6,1,7,1  ,)
+    	black_b = new Box("black",0,0,6,1,3,1  ,)
+   	black_c = new Box("black",0,0,6,1,1,1,)
+    	green_a = new Box("green",0,0,6,6,6,6,)
+    	green_b = new Box("green",0,0,6,3,3,3,)
+ 
+	switch (level) {
+		case 1: {			
+   
+		}break;
+		case 2: {
+
+		}break;
+		case 3: {
+
+		}break;
+	}
+   
+	 green_a.material.transparent = true
+    green_b.material.transparent = true
+    black_a.material.transparent = true
+    black_a.material.opacity = 0.25
+    black_b.material.transparent = true
+    black_b.material.opacity = 0.25
+    black_c.material.transparent = true
+    black_c.material.opacity = 0.25
+   
+}
+preload(1)
 //load
 Game.local.sky.build()
 Game.local.out.build()
@@ -503,28 +531,20 @@ document.addEventListener("keydown", function(event){
 	switch(event.code){
 		case "ArrowRight" : {
 			Game.global.car.obj.rotation.y = (15*Math.PI)/180
-			Game.global.car.obj.position.x += 0.25
+			Game.global.car.obj.position.x += 1.5 
 		}break;
 		case "ArrowLeft" : {
 			Game.global.car.obj.rotation.y = (-15*Math.PI)/180
-			Game.global.car.obj.position.x += -0.25
+			Game.global.car.obj.position.x -= 1.5
 		}break;
 		case "ArrowUp" : {
-			Game.local.speed += 0.5
+			Game.local.speed += 0.75
 			Game.global.car.obj.position.z -= 0.1
 			if(Game.global.car.obj.position.z < 3.0) {
 				Game.global.car.obj.position.z += 0.1
-				Game.local.speed -= 0.5
+				Game.local.speed -= 0.75
 			}
 		}break;		
-		case "ArrowDown" : {
-			Game.local.speed -= 0.5
-			Game.global.car.obj.position.z += 0.1
-			if(Game.global.car.obj.position.z > 4.0) {
-				Game.global.car.obj.position.z -= 0.1
-				Game.local.speed += 0.5
-			}
-		}break;
 	}
 })
 document.addEventListener("keyup", function(event){
@@ -538,12 +558,49 @@ document.addEventListener("keyup", function(event){
 		}break;
 	}
 })
+
 let check = setInterval( function () {
 	if (Game.global.status == true) {
-		if(Game.global.car.obj.position.x > 0) Game.global.car.obj.position.x -= 0.005
-		if(Game.global.car.obj.position.x < 0) Game.global.car.obj.position.x += 0.005
+		if(Game.global.car.obj.position.x > 0) Game.global.car.obj.position.x -= 0.1
+		if(Game.global.car.obj.position.x < 0) Game.global.car.obj.position.x += 0.1
+		//collisions
+		let actual = Game.global.car.obj.position.x
+		Game.local.ground.data[3].forEach( el=> {
+			if(el.type == "black_a"){
+				if( actual > el.obj.position.x - 0.5 &&  actual < el.obj.position.x +0.5) {
+					console.log("catch_a")
+					Game.local.ground.move.status = false
+				} 
+			}
+			if(el.type == "black_b"){
+				if( actual > el.obj.position.x - 1 &&  actual < el.obj.position.x +1) {
+					console.log("catch_b")
+					Game.local.speed /= 3
+				} 
+			}
+			if(el.type == "black_c"){
+				if( actual > el.obj.position.x - 1.25 &&  actual < el.obj.position.x +1.25) {
+					console.log("catch_c")
+					Game.global.score -= 25
+				} 
+			}
+			if(el.type == "green"){
+				if( actual > el.obj.position.x - 0.5 &&  actual < el.obj.position.x +0.5) {
+					console.log("green")
+					Game.local.speed -= 0.05
+				} 
+			}
+			if(Game.local.speed  < 0) Game.local.speed = 0.0
+			if(Game.local.speed  >  Game.local.limit * 1.25) {
+				Game.local.speed -= 0.25
+				Game.global.car.obj.position.z += 0.01
+			}
+			if(Game.global.score < 0) Game.global.speed = 0
+			if(Game.global.car.obj.position.z < 3.5) Game.global.car.obj.position.z += 0.05
+		})
+		console.log(Game.global.score,Game.local.speed)
 	}
-})
+},50)
 //
 
 
