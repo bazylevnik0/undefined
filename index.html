@@ -6,6 +6,51 @@
 		</title>
 		<link rel="stylesheet" href="index.css">
 	</head>
-	<body></body>
+	<body>
+		<div id="movie" class="screen"></div>
+		<canvas id="canvas"></canvas>
+		<div id="menu" class="screen">
+			<div class="box">
+				<button id="new">new game</button>
+			</div>
+		</div>
+		<div id="select_car" class="screen">
+			<table>
+				<tr>
+					<td>
+						<img src="google.com" class="car" id="red">
+					</td>
+					<td>
+						<img src="google.com" class="car" id="blue">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="select_map" class="screen">
+			<table>
+				<tr>
+					<td>
+						<img src="google.com" class="map" id="nature">
+					</td>
+					<td>
+						<img src="google.com" class="map" id="city">
+					</td>
+					<td>
+						<img src="google.com" class="map" id="cyber">
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="nav">
+			<div id="nav_up">
+				<label>score:</score>
+				<p id="score"></p>
+			</div>	
+			<div id="nav_down">
+				<label>speed:</score>
+				<p id="speed"></p>
+			</div>	
+		</div>
+	</body>
 	<script src="index.js" type="module"></script>
 </html>
