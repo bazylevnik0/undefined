@@ -105,23 +105,44 @@ const Game         = {}
 		   items[]
 		   build()
     */
+    /*
+	preload
+	load
+	animate
+	system
+    */
 
       //g
       Game.global = {
-		status : true,
+		status : false,
 		score  : 0
       }
 		
          Game.global.car = {
 		geometry : new THREE.BoxGeometry(),
-		material : new THREE.MeshBasicMaterial( { color: 0xffffff } )
+		material : new THREE.MeshBasicMaterial( { color: 0xffffff } ),
+		loaded   : false
 	 } 
 	    Game.global.car.build = function() {
-			Game.global.car.obj = new THREE.Mesh( Game.global.car.geometry , Game.global.car.material )	
+			switch (car) {
+				case "red" : {
+					Game.global.car.obj = new THREE.Mesh( Game.global.car.geometry , Game.global.car.material )	
+		
+				}break;
+				case "blue": {
+					Game.global.car.obj = new THREE.Mesh( Game.global.car.geometry , Game.global.car.material )	
+				}break;
+			}
 			Game.global.car.obj.name = "car"
 			Game.global.car.obj.position.z = 4
 			Game.global.car.obj.scale.set(1,1,2)
 			scene.add(Game.global.car.obj)
+			let timer = setInterval( ()=> {
+				if(Game.global.car.obj !== undefined){
+					clearInterval(timer)
+					Game.global.car.loaded = true
+				}
+			},100)
 	    }
       //l
       Game.local  = {
@@ -472,46 +493,77 @@ const Game         = {}
 
 //preload
 var brown , green , black , black_a , black_b , black_c , green_a , green_b
-function preload(level) {
-	brown   = new Plane("brown",0,6,2,1,true)
-    	green   = new Plane("green",0,6,1,1,true)
-   	black   = new Plane("black",0,6,1,1,true)
-    	black_a = new Box("black",0,0,6,1,7,1  ,)
-    	black_b = new Box("black",0,0,6,1,3,1  ,)
-   	black_c = new Box("black",0,0,6,1,1,1,)
-    	green_a = new Box("green",0,0,6,6,6,6,)
-    	green_b = new Box("green",0,0,6,3,3,3,)
- 
-	switch (level) {
-		case 1: {			
+function preload() {
+	new Promise((resolve, reject) => {
+		switch (map) {
+			case "nature" : {				
+				brown   = new Plane("brown",0,6,2,1,true)
+    				green   = new Plane("green",0,6,1,1,true)
+   				black   = new Plane("black",0,6,1,1,true)
+    				black_a = new Box("black",0,0,6,1,7,1  ,)
+    				black_b = new Box("black",0,0,6,1,3,1  ,)
+   				black_c = new Box("black",0,0,6,1,1,1,)
+    				green_a = new Box("green",0,0,6,6,6,6,)
+    				green_b = new Box("green",0,0,6,3,3,3,)
+			}break;
+			case "city" : {				
+				brown   = new Plane("brown",0,6,2,1,true)
+    				green   = new Plane("green",0,6,1,1,true)
+   				black   = new Plane("black",0,6,1,1,true)
+    				black_a = new Box("black",0,0,6,1,7,1  ,)
+    				black_b = new Box("black",0,0,6,1,3,1  ,)
+   				black_c = new Box("black",0,0,6,1,1,1,)
+    				green_a = new Box("green",0,0,6,6,6,6,)
+    				green_b = new Box("green",0,0,6,3,3,3,)
+			}break;
+			case "cyber" : {				
+				brown   = new Plane("brown",0,6,2,1,true)
+    				green   = new Plane("green",0,6,1,1,true)
+   				black   = new Plane("black",0,6,1,1,true)
+    				black_a = new Box("black",0,0,6,1,7,1  ,)
+    				black_b = new Box("black",0,0,6,1,3,1  ,)
+   				black_c = new Box("black",0,0,6,1,1,1,)
+    				green_a = new Box("green",0,0,6,6,6,6,)
+    				green_b = new Box("green",0,0,6,3,3,3,)
+			}break;
+		}
    
-		}break;
-		case 2: {
-
-		}break;
-		case 3: {
-
-		}break;
-	}
-   
-	 green_a.material.transparent = true
-    green_b.material.transparent = true
-    black_a.material.transparent = true
-    black_a.material.opacity = 0.25
-    black_b.material.transparent = true
-    black_b.material.opacity = 0.25
-    black_c.material.transparent = true
-    black_c.material.opacity = 0.25
-   
+	 	green_a.material.transparent = true
+ 		green_b.material.transparent = true
+    		black_a.material.transparent = true
+    		black_a.material.opacity = 0.25
+    		black_b.material.transparent = true
+    		black_b.material.opacity = 0.25
+    		black_c.material.transparent = true
+    		black_c.material.opacity = 0.25
+   		
+		let timer = setInterval( function() {
+			if(green_b!==undefined){
+				clearInterval(timer)
+				resolve(true)
+			}
+		},1000)
+	})
 }
-preload(1)
 //load
-Game.local.sky.build()
-Game.local.out.build()
-Game.local.ground.build()
-Game.local.ground.move.run()
-Game.global.car.build()
-//show
+var car, map , film
+async function load(){
+	await preload();
+	Game.local.sky.build()
+	Game.local.out.build()
+	Game.local.ground.build()
+	Game.local.ground.move.run()
+	Game.global.car.build()
+
+	let timer = setInterval( function() {
+		if(Game.global.car.loaded == true) {
+			clearInterval(timer)
+			Game.global.status = true
+		}
+	},500)
+}
+
+//animate
 const animate = function () {
 
 	requestAnimationFrame( animate );
@@ -525,9 +577,76 @@ const animate = function () {
 animate();
 
 //control
+//html
+let menu = document.getElementById('menu')
+let select_car = document.getElementById('select_car')
+let select_map = document.getElementById('select_map')
+let movie = document.getElementById('movie')
+let nav = document.getElementById('nav')
+let html_score = document.getElementById('score')
+let html_speed = document.getElementById('speed')
+ 
+menu.addEventListener( "click",function(event) {
+	if(event.target.id == "new"){
+		menu.style.zIndex = -1
+		select_car.style.zIndex = 1;
+	}
+})
 
+select_car.addEventListener( "click", function(event) {
+	switch (event.target.id){
+		case "red" : {
+			car = "red"
+			next()
+		}break;
+		case "blue" : {
+			car = "blue"
+			next()
+		}break;
+	}
+	function next() {
+		select_car.style.zIndex = -1
+		select_map.style.zIndex = 1
+	}
+})
+
+select_map.addEventListener( "click", function(event) {
+	switch (event.target.id){
+		case "nature" : {
+			map = "nature"
+			next()
+		}break;
+		case "city" : {
+			map = "city"
+			next()
+		}break;
+		case "cyber" : {
+			map = "cyber"
+			next()
+		}break;
+	}
+	function next() {
+		film = map
+		select_map.style.zIndex = -1
+		var img_film = new Image(); 
+		    img_film.src = 'image1.png';
+		movie.appendChild(img_film)
+		movie.style.zIndex = 1
+		load()
+		setTimeout( ()=> {
+			let timer = setInterval( ()=>{
+				if( Game.global.status == true) {
+					movie.style.zIndex = -1
+					canvas.style.zIndex = 1
+					nav.style.zIndex = 2;
+				}
+			},100)
+		},1000)
+	}
+})
+
+//game
 document.addEventListener("keydown", function(event){
-	//console.log(event.code)
 	switch(event.code){
 		case "ArrowRight" : {
 			Game.global.car.obj.rotation.y = (15*Math.PI)/180
@@ -548,7 +667,6 @@ document.addEventListener("keydown", function(event){
 	}
 })
 document.addEventListener("keyup", function(event){
-	//console.log(event.code)
 	switch(event.code){
 		case "ArrowRight" : {
 			Game.global.car.obj.rotation.y = 0
@@ -598,10 +716,9 @@ let check = setInterval( function () {
 			if(Game.global.score < 0) Game.global.speed = 0
 			if(Game.global.car.obj.position.z < 3.5) Game.global.car.obj.position.z += 0.05
 		})
-		console.log(Game.global.score,Game.local.speed)
+		html_score.innerHTML = ""+Game.global.score
+		html_speed.innerHTML = ""+Game.local.speed
 	}
 },50)
-//
-
 
 //system
