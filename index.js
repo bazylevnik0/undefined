@@ -1,8 +1,6 @@
 import * as THREE     from "/build/three.module.js"
 import { GLTFLoader } from '/build/GLTFLoader.js';
 
-var first_check = true
-
 const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
       camera.position.z = 6;
@@ -73,19 +71,111 @@ const Obj = function(type,obj,items) {
 }
 
 //structure
-const Movie        = {}
-const Menu         = {}
-const Select_car   = {}
-const Select_level = {}
+const Movie        = {
+	el : document.getElementById('movie')
+}
+const Menu         = {
+	el : document.getElementById('menu')
+
+}
+	Menu.el.addEventListener( "click",function(event) {
+	if(event.target.id == "new"){
+		Menu.el.style.zIndex = -1
+		Select_car.el.style.zIndex = 1;
+		}
+	})
+
+const Select_car   = {
+	el : document.getElementById('select_car')
+}
+
+	Select_car.el.addEventListener( "click", function(event) {
+	switch (event.target.id){
+		case "red" : {
+			Game.global.actual.car = "red"
+			next()
+		}break;
+		case "blue" : {
+			Game.global.actual.car = "blue"
+			next()
+		}break;
+	}
+	function next() {
+		Select_car.el.style.zIndex = -1
+		Select_map.el.style.zIndex = 1
+	}
+	})
+
+const Select_map = {
+	el :document.getElementById('select_map')
+}
+	
+	Select_map.el.addEventListener( "click", function(event) {
+	switch (event.target.id){
+		case "nature" : {
+			Game.global.actual.map = "nature"
+			next()
+		}break;
+		case "city" : {
+			Game.global.actual.map = "city"
+			next()
+		}break;
+		case "cyber" : {
+			Game.global.actual.map = "cyber"
+			next()
+		}break;
+	}
+	function next() {
+		Game.global.actual.film = Game.global.actual.map
+		Select_map.el.style.zIndex = -1
+		Movie.obj = new Image(); 
+		    Movie.obj.src = 'image1.png';
+		Movie.el.appendChild(Movie.obj)
+		Movie.el.style.zIndex = 1
+		Game.load()
+		setTimeout( ()=> {
+			let timer = setInterval( ()=>{
+				if( Game.global.status == true) {
+					Movie.el.style.zIndex = -1
+					canvas.style.zIndex = 1
+					Nav.el.style.zIndex = 2;
+				}
+			},100)
+		},1000)
+	}
+	})
+
+const Nav	   ={
+	el :  document.getElementById('nav'),
+	score : {
+		el : document.getElementById('score')
+	},
+	speed : {
+		el : document.getElementById('speed')
+	}
+}
+
 const Game         = {}
     /*Game
 	  global.
+		actual.
+			car
+			map
+			film
 		status.
 		car.
 	  local.
 		track.
 			count()
 		ground.
+			model.
+				brown
+				green
+				green_a
+				green_b
+				black_a
+				black_b
+				black_c
 			data[]
 			build()
 			move.
@@ -115,7 +205,12 @@ const Game         = {}
       //g
       Game.global = {
 		status : false,
-		score  : 0
+		score  : 0,
+		actual :{
+			car : undefined,
+			map : undefined,
+			film : undefined
+		}
       }
 		
          Game.global.car = {
@@ -124,7 +219,7 @@ const Game         = {}
 		loaded   : false
 	 } 
 	    Game.global.car.build = function() {
-			switch (car) {
+			switch (Game.global.actual.car) {
 				case "red" : {
 					Game.global.car.obj = new THREE.Mesh( Game.global.car.geometry , Game.global.car.material )	
 		
@@ -165,19 +260,28 @@ const Game         = {}
          }
 	 //gr
 	 Game.local.ground = {
-         	data: [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ]
+         	data: [ [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [] ],
+		model : {
+			brown : {},
+			green : {},
+			green_a : {},
+			green_b : {},
+			black_a : {},
+			black_b : {},
+			black_c : {}
+		}
 	 }
 		Game.local.ground.build = function() {
 			for (let j = 0; j <= 18; j++){
 				for (let i = 0; i <= 18 ; i++){
 					if(i >= 8 && i <= 12 || j % 2 == 0) {
-						let temp = new Obj("way", brown.obj.clone(),[])
+						let temp = new Obj("way", Game.local.ground.model.brown.obj.clone(),[])
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
 						scene.add(temp.obj)
 					} else {
-						let temp = new Obj("green", green.obj.clone(),[])
+						let temp = new Obj("green", Game.local.ground.model.green.obj.clone(),[])
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
@@ -223,8 +327,8 @@ const Game         = {}
 									}
 									Game.local.ground.move.push("straight")
 									Game.local.ground.move.shift()
-									green_a.material.opacity < 1 ? green_a.material.opacity += 0.05 : false
-									green_a.material.opacity < 1 ? green_b.material.opacity += 0.05 : false
+									Game.local.ground.model.green_a.material.opacity < 1 ? Game.local.ground.model.green_a.material.opacity += 0.05 : false
+									Game.local.ground.model.green_a.material.opacity < 1 ? Game.local.ground.model.green_b.material.opacity += 0.05 : false
 								}break;	
 								case "left" : {
 									if ( camera.rotation.y < -0.25) {
@@ -234,8 +338,8 @@ const Game         = {}
 									}
 									Game.local.ground.move.push("left")
 									Game.local.ground.move.shift()
-									green_a.material.opacity > 0.4 ? green_a.material.opacity -= 0.1 : false
-									green_a.material.opacity > 0.4 ? green_b.material.opacity -= 0.1 : false
+									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_a.material.opacity -= 0.1 : false
+									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_b.material.opacity -= 0.1 : false
 								}break;	
 								case "right" : {
 									if ( camera.rotation.y < 0.25) {
@@ -245,8 +349,8 @@ const Game         = {}
 									}
 									Game.local.ground.move.push("right")
 									Game.local.ground.move.shift()							
-									green_a.material.opacity > 0.4 ? green_a.material.opacity -= 0.1 : false
-									green_a.material.opacity > 0.4 ? green_b.material.opacity -= 0.1 : false
+									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_a.material.opacity -= 0.1 : false
+									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_b.material.opacity -= 0.1 : false
 								}break;
 							}
 						}
@@ -256,7 +360,6 @@ const Game         = {}
 				},100)
 			},
 			shift: function() {
-			//for test:
 				let temp = Game.local.ground.data[0]  
 				temp.forEach(el=>{
 					scene.remove(el.obj)
@@ -280,10 +383,8 @@ const Game         = {}
 				}
 				Game.local.ground.data[0] = null
 				Game.local.ground.data.shift()
-			//
 			},
 			push:  function(direction) {
-			//for test:
 				Game.local.ground.data[18] = []
 					let delta = Game.local.track.count()
 					let delta_time = Math.random()*30
@@ -301,12 +402,12 @@ const Game         = {}
 				let temp = []
 				for (let i = 0; i <= 18 ; i++){
 					if(i >= (Game.local.track.pos + 10)-3 && i <= (Game.local.track.pos + 10)+3 ) {
-						temp[i] = new Obj("way", brown.obj.clone(), [])
+						temp[i] = new Obj("way", Game.local.ground.model.brown.obj.clone(), [])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
 						scene.add(temp[i].obj)
 					} else {
-						temp[i] = new Obj("green", green.obj.clone(), [])
+						temp[i] = new Obj("green", Game.local.ground.model.green.obj.clone(), [])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
 						scene.add(temp[i].obj)
@@ -319,14 +420,14 @@ const Game         = {}
 					let seed_a_dir = Math.floor(Math.random()*15)
 					switch (seed_a_dir) {
 						case 0 : {					
-							temp[9].obj.material = temp[8].obj.material = temp[7].obj.material = temp[6].obj.material = temp[5].obj.material = temp[4].obj.material = black.obj.material
+							temp[9].obj.material = temp[8].obj.material = temp[7].obj.material = temp[6].obj.material = temp[5].obj.material = temp[4].obj.material = Game.local.ground.model.black.obj.material
 							temp[9].type =	temp[8].type =	temp[7].type =	temp[6].type = temp[5].type = temp[4].type = "black_a"
-							temp[9].items.unshift( black_a.obj.clone() )
-							temp[8].items.unshift( black_a.obj.clone() )
-							temp[7].items.unshift( black_a.obj.clone() )
-							temp[6].items.unshift( black_a.obj.clone() )
-							temp[5].items.unshift( black_a.obj.clone() )
-							temp[4].items.unshift( black_a.obj.clone() )
+							temp[9].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[8].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[7].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[6].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[5].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[4].items.unshift( Game.local.ground.model.black_a.obj.clone() )
 							temp[9].items[0].position.x = Game.local.ground.move.convert_x(9)
 							temp[8].items[0].position.x = Game.local.ground.move.convert_x(8)
 							temp[7].items[0].position.x = Game.local.ground.move.convert_x(7)
@@ -342,14 +443,14 @@ const Game         = {}
 								  temp[4].items[0])
 						}break;
 						case 1 : {
-							temp[10].obj.material = temp[11].obj.material = temp[12].obj.material = temp[13].obj.material = temp[14].obj.material = temp[15].obj.material = black.obj.material
+							temp[10].obj.material = temp[11].obj.material = temp[12].obj.material = temp[13].obj.material = temp[14].obj.material = temp[15].obj.material = Game.local.ground.model.black.obj.material
 							temp[10].type =	temp[11].type =	temp[12].type =	temp[13].type = temp[14].type = temp[15].type = "black_a"
-							temp[10].items.unshift( black_a.obj.clone() )
-							temp[11].items.unshift( black_a.obj.clone() )
-							temp[12].items.unshift( black_a.obj.clone() )
-							temp[13].items.unshift( black_a.obj.clone() )
-							temp[14].items.unshift( black_a.obj.clone() )
-							temp[15].items.unshift( black_a.obj.clone() )
+							temp[10].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[11].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[12].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[13].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[14].items.unshift( Game.local.ground.model.black_a.obj.clone() )
+							temp[15].items.unshift( Game.local.ground.model.black_a.obj.clone() )
 							temp[10].items[0].position.x = Game.local.ground.move.convert_x(10)
 							temp[11].items[0].position.x = Game.local.ground.move.convert_x(11)
 							temp[12].items[0].position.x = Game.local.ground.move.convert_x(12)
@@ -374,11 +475,11 @@ const Game         = {}
 					switch (seed_b_dir) {
 						case 0 : {					
 							let seed_b_place = Math.floor(Math.random()*8)+4
-							temp[0+seed_b_place].obj.material = black.obj.material
-							temp[1+seed_b_place].obj.material = black.obj.material			
+							temp[0+seed_b_place].obj.material = Game.local.ground.model.black.obj.material
+							temp[1+seed_b_place].obj.material = Game.local.ground.model.black.obj.material			
 							temp[0+seed_b_place].type =	temp[1+seed_b_place].type = "black_b"
-							temp[0+seed_b_place].items.unshift( black_b.obj.clone() )
-							temp[1+seed_b_place].items.unshift( black_b.obj.clone() )
+							temp[0+seed_b_place].items.unshift( Game.local.ground.model.black_b.obj.clone() )
+							temp[1+seed_b_place].items.unshift( Game.local.ground.model.black_b.obj.clone() )
 							temp[0+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_b_place)
 							temp[1+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(1+seed_b_place)
 							temp[0+seed_b_place].items[0].position.z = temp[1+seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
@@ -387,11 +488,11 @@ const Game         = {}
 						}break;
 						case 1 : {						
 							let seed_b_place = Math.floor(Math.random()*8)+4
-							temp[18-seed_b_place].obj.material = black.obj.material
-							temp[17-seed_b_place].obj.material = black.obj.material
+							temp[18-seed_b_place].obj.material = Game.local.ground.model.black.obj.material
+							temp[17-seed_b_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[18-seed_b_place].type =	temp[17-seed_b_place].type = "black_b"
-							temp[18-seed_b_place].items.unshift( black_b.obj.clone() )
-							temp[17-seed_b_place].items.unshift( black_b.obj.clone() )
+							temp[18-seed_b_place].items.unshift( Game.local.ground.model.black_b.obj.clone() )
+							temp[17-seed_b_place].items.unshift( Game.local.ground.model.black_b.obj.clone() )
 							temp[18-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_b_place)
 							temp[17-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(17-seed_b_place)
 							temp[18-seed_b_place].items[0].position.z = temp[17-seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
@@ -409,18 +510,18 @@ const Game         = {}
 					switch (seed_c_dir) {
 						case 0 : {					
 							let seed_c_place = Math.floor(Math.random()*8)+8
-							temp[0+seed_c_place].obj.material = black.obj.material
+							temp[0+seed_c_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[0+seed_c_place].type = "black_c"
-							temp[0+seed_c_place].items.unshift( black_c.obj.clone() )
+							temp[0+seed_c_place].items.unshift( Game.local.ground.model.black_c.obj.clone() )
 							temp[0+seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_c_place)
 							temp[0+seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
 							scene.add(temp[0+seed_c_place].items[0])
 						}break;
 						case 1 : {						
 							let seed_c_place = Math.floor(Math.random()*8)+8
-							temp[18-seed_c_place].obj.material = black.obj.material
+							temp[18-seed_c_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[18-seed_c_place].type = "black_c"
-							temp[18-seed_c_place].items.unshift( black_c.obj.clone() )			
+							temp[18-seed_c_place].items.unshift( Game.local.ground.model.black_c.obj.clone() )			
 							temp[18-seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_c_place)
 							temp[18-seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
 							scene.add(temp[18-seed_c_place].items[0])					
@@ -435,7 +536,7 @@ const Game         = {}
 					if(el.type == "green") {
 						let rand = Math.floor(Math.random()*k*10*3)
 						if (rand == 0){
-							el.items.unshift( green_a.obj.clone() )
+							el.items.unshift( Game.local.ground.model.green_a.obj.clone() )
 							el.items[0].position.x = el.obj.position.x * 2
 							el.items[0].position.z = Game.local.ground.move.convert_z(18)
 							scene.add(el.items[0])
@@ -446,7 +547,7 @@ const Game         = {}
 					if(el.type == "green"){
 						let rand = Math.floor(Math.random()*k*10)
 						if (rand == 0){
-							el.items.unshift( green_b.obj.clone() )
+							el.items.unshift( Game.local.ground.model.green_b.obj.clone() )
 							el.items[0].position.x = el.obj.position.x * 2
 							el.items[0].position.z = Game.local.ground.move.convert_z(18)
 							scene.add(el.items[0])
@@ -454,7 +555,6 @@ const Game         = {}
 					}
 				})
 				Game.local.ground.data[18] = temp;
-			//
 			},
 			convert_x: function(x) {
 				return x -10
@@ -492,53 +592,52 @@ const Game         = {}
 
 
 //preload
-var brown , green , black , black_a , black_b , black_c , green_a , green_b
-function preload() {
+Game.preload = function () {
 	new Promise((resolve, reject) => {
-		switch (map) {
+		switch (Game.global.actual.map) {
 			case "nature" : {				
-				brown   = new Plane("brown",0,6,2,1,true)
-    				green   = new Plane("green",0,6,1,1,true)
-   				black   = new Plane("black",0,6,1,1,true)
-    				black_a = new Box("black",0,0,6,1,7,1  ,)
-    				black_b = new Box("black",0,0,6,1,3,1  ,)
-   				black_c = new Box("black",0,0,6,1,1,1,)
-    				green_a = new Box("green",0,0,6,6,6,6,)
-    				green_b = new Box("green",0,0,6,3,3,3,)
+				Game.local.ground.model.brown   = new Plane("brown",0,6,2,1,true)
+    				Game.local.ground.model.green   = new Plane("green",0,6,1,1,true)
+   				Game.local.ground.model.black   = new Plane("black",0,6,1,1,true)
+    				Game.local.ground.model.black_a = new Box("black",0,0,6,1,7,1  ,)
+    				Game.local.ground.model.black_b = new Box("black",0,0,6,1,3,1  ,)
+   				Game.local.ground.model.black_c = new Box("black",0,0,6,1,1,1,)
+    				Game.local.ground.model.green_a = new Box("green",0,0,6,6,6,6,)
+    				Game.local.ground.model.green_b = new Box("green",0,0,6,3,3,3,)
 			}break;
 			case "city" : {				
-				brown   = new Plane("brown",0,6,2,1,true)
-    				green   = new Plane("green",0,6,1,1,true)
-   				black   = new Plane("black",0,6,1,1,true)
-    				black_a = new Box("black",0,0,6,1,7,1  ,)
-    				black_b = new Box("black",0,0,6,1,3,1  ,)
-   				black_c = new Box("black",0,0,6,1,1,1,)
-    				green_a = new Box("green",0,0,6,6,6,6,)
-    				green_b = new Box("green",0,0,6,3,3,3,)
+				Game.local.ground.model.brown   = new Plane("brown",0,6,2,1,true)
+    				Game.local.ground.model.green   = new Plane("green",0,6,1,1,true)
+   				Game.local.ground.model.black   = new Plane("black",0,6,1,1,true)
+    				Game.local.ground.model.black_a = new Box("black",0,0,6,1,7,1  ,)
+    				Game.local.ground.model.black_b = new Box("black",0,0,6,1,3,1  ,)
+   				Game.local.ground.model.black_c = new Box("black",0,0,6,1,1,1,)
+    				Game.local.ground.model.green_a = new Box("green",0,0,6,6,6,6,)
+    				Game.local.ground.model.green_b = new Box("green",0,0,6,3,3,3,)
 			}break;
 			case "cyber" : {				
-				brown   = new Plane("brown",0,6,2,1,true)
-    				green   = new Plane("green",0,6,1,1,true)
-   				black   = new Plane("black",0,6,1,1,true)
-    				black_a = new Box("black",0,0,6,1,7,1  ,)
-    				black_b = new Box("black",0,0,6,1,3,1  ,)
-   				black_c = new Box("black",0,0,6,1,1,1,)
-    				green_a = new Box("green",0,0,6,6,6,6,)
-    				green_b = new Box("green",0,0,6,3,3,3,)
+				Game.local.ground.model.brown   = new Plane("brown",0,6,2,1,true)
+    				Game.local.ground.model.green   = new Plane("green",0,6,1,1,true)
+   				Game.local.ground.model.black   = new Plane("black",0,6,1,1,true)
+    				Game.local.ground.model.black_a = new Box("black",0,0,6,1,7,1  ,)
+    				Game.local.ground.model.black_b = new Box("black",0,0,6,1,3,1  ,)
+   				Game.local.ground.model.black_c = new Box("black",0,0,6,1,1,1,)
+    				Game.local.ground.model.green_a = new Box("green",0,0,6,6,6,6,)
+    				Game.local.ground.model.green_b = new Box("green",0,0,6,3,3,3,)
 			}break;
 		}
    
-	 	green_a.material.transparent = true
- 		green_b.material.transparent = true
-    		black_a.material.transparent = true
-    		black_a.material.opacity = 0.25
-    		black_b.material.transparent = true
-    		black_b.material.opacity = 0.25
-    		black_c.material.transparent = true
-    		black_c.material.opacity = 0.25
+	 	Game.local.ground.model.green_a.material.transparent = true
+ 		Game.local.ground.model.green_b.material.transparent = true
+    		Game.local.ground.model.black_a.material.transparent = true
+    		Game.local.ground.model.black_a.material.opacity = 0.25
+    		Game.local.ground.model.black_b.material.transparent = true
+    		Game.local.ground.model.black_b.material.opacity = 0.25
+    		Game.local.ground.model.black_c.material.transparent = true
+    		Game.local.ground.model.black_c.material.opacity = 0.25
    		
 		let timer = setInterval( function() {
-			if(green_b!==undefined){
+			if(Game.local.ground.model.green_b!==undefined){
 				clearInterval(timer)
 				resolve(true)
 			}
@@ -546,9 +645,8 @@ function preload() {
 	})
 }
 //load
-var car, map , film
-async function load(){
-	await preload();
+Game.load = async function (){
+	await Game.preload();
 	Game.local.sky.build()
 	Game.local.out.build()
 	Game.local.ground.build()
@@ -577,75 +675,6 @@ const animate = function () {
 animate();
 
 //control
-//html
-let menu = document.getElementById('menu')
-let select_car = document.getElementById('select_car')
-let select_map = document.getElementById('select_map')
-let movie = document.getElementById('movie')
-let nav = document.getElementById('nav')
-let html_score = document.getElementById('score')
-let html_speed = document.getElementById('speed')
- 
-menu.addEventListener( "click",function(event) {
-	if(event.target.id == "new"){
-		menu.style.zIndex = -1
-		select_car.style.zIndex = 1;
-	}
-})
-
-select_car.addEventListener( "click", function(event) {
-	switch (event.target.id){
-		case "red" : {
-			car = "red"
-			next()
-		}break;
-		case "blue" : {
-			car = "blue"
-			next()
-		}break;
-	}
-	function next() {
-		select_car.style.zIndex = -1
-		select_map.style.zIndex = 1
-	}
-})
-
-select_map.addEventListener( "click", function(event) {
-	switch (event.target.id){
-		case "nature" : {
-			map = "nature"
-			next()
-		}break;
-		case "city" : {
-			map = "city"
-			next()
-		}break;
-		case "cyber" : {
-			map = "cyber"
-			next()
-		}break;
-	}
-	function next() {
-		film = map
-		select_map.style.zIndex = -1
-		var img_film = new Image(); 
-		    img_film.src = 'image1.png';
-		movie.appendChild(img_film)
-		movie.style.zIndex = 1
-		load()
-		setTimeout( ()=> {
-			let timer = setInterval( ()=>{
-				if( Game.global.status == true) {
-					movie.style.zIndex = -1
-					canvas.style.zIndex = 1
-					nav.style.zIndex = 2;
-				}
-			},100)
-		},1000)
-	}
-})
-
-//game
 document.addEventListener("keydown", function(event){
 	switch(event.code){
 		case "ArrowRight" : {
@@ -716,8 +745,8 @@ let check = setInterval( function () {
 			if(Game.global.score < 0) Game.global.speed = 0
 			if(Game.global.car.obj.position.z < 3.5) Game.global.car.obj.position.z += 0.05
 		})
-		html_score.innerHTML = ""+Game.global.score
-		html_speed.innerHTML = ""+Game.local.speed
+		Nav.score.el.innerHTML = ""+Game.global.score
+		Nav.speed.el.innerHTML = ""+Game.local.speed
 	}
 },50)
 
