@@ -58,8 +58,11 @@ img{
 	padding-top: 50px;
 }
 
+#nav {
+	z-index: -1;
+}
 #nav_up {
-	z-index: 2;
+	z-index: inherit;
 	position: absolute;
 	top: 0px;
 	width: 100%;
@@ -67,8 +70,8 @@ img{
 	color: white;
 }
 
-#nav_down {
-	z-index: -1;
+#nav_down {	
+	z-index: inherit;
 	position: absolute;
 	bottom: 0px;
 	width: 100%;
