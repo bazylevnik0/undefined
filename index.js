@@ -1,18 +1,5 @@
-import * as THREE     from "/build/three.module.js"
-import { GLTFLoader } from '/build/GLTFLoader.js';
+import * as THREE from "/build/three.module.js" import { GLTFLoader } from '/build/GLTFLoader.js';
 
-const scene  = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-      camera.position.z = 6;
-      camera.position.y = 1;
-      camera.rotation.x = (-10*Math.PI)/180
-
-let canvas = document.getElementById("canvas")
-let context = canvas.getContext("webgl")
-
-const renderer = new THREE.WebGLRenderer( { canvas: canvas } );
-      renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
-      
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
 		this.geometry = new THREE.PlaneGeometry();
@@ -36,7 +23,7 @@ const Plane  = function(color,x,z,w,h,v) {
 		if(h)this.obj.scale.y = h
 		if(color == "green") this.obj.scale.set(1,1,)
 		else  this.obj.scale.set(2,2,)
-		scene.add(this.obj)
+		Game.global.scene.add(this.obj)
 	       }
 
 const Box  = function(color,x,y,z,w,h,d) {
@@ -60,7 +47,7 @@ const Box  = function(color,x,y,z,w,h,d) {
 		if(w)this.obj.scale.x = w
 		if(h)this.obj.scale.y = h
 		if(d)this.obj.scale.z = d
-		scene.add(this.obj)
+		Game.global.scene.add(this.obj)
 	       }
 
 const Obj = function(type,obj,items) {
@@ -157,7 +144,15 @@ const Nav	   ={
 
 const Game         = {}
     /*Game
+	  canvas
+		el
+		ctx
+	  renderer
+	  animate()
+
 	  global.
+		scene
+		camera
 		actual.
 			car
 			map
@@ -194,16 +189,23 @@ const Game         = {}
 		   obj
 		   items[]
 		   build()
-    */
-    /*
 	preload
 	load
-	animate
-	system
-    */
+      */
 
       //g
+      Game.canvas = {}
+      Game.canvas.el = document.getElementById("canvas")
+      Game.canvas.ctx = Game.canvas.el.getContext("webgl") 
+      Game.renderer = new THREE.WebGLRenderer( { canvas: Game.canvas.el } );
+      Game.renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
+      Game.animate = function () {
+	requestAnimationFrame( Game.animate );
+	Game.renderer.render( Game.global.scene, Game.global.camera );
+      };
+
       Game.global = {
+		canvas : {},
 		status : false,
 		score  : 0,
 		actual :{
@@ -212,6 +214,13 @@ const Game         = {}
 			film : undefined
 		}
       }
+
+	 Game.global.scene  = new THREE.Scene();
+	 Game.global.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+         Game.global.camera.position.z = 6;
+         Game.global.camera.position.y = 1;
+         Game.global.camera.rotation.x = (-10*Math.PI)/180
+
 		
          Game.global.car = {
 		geometry : new THREE.BoxGeometry(),
@@ -231,7 +240,7 @@ const Game         = {}
 			Game.global.car.obj.name = "car"
 			Game.global.car.obj.position.z = 4
 			Game.global.car.obj.scale.set(1,1,2)
-			scene.add(Game.global.car.obj)
+			Game.global.scene.add(Game.global.car.obj)
 			let timer = setInterval( ()=> {
 				if(Game.global.car.obj !== undefined){
 					clearInterval(timer)
@@ -279,13 +288,13 @@ const Game         = {}
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
-						scene.add(temp.obj)
+						Game.global.scene.add(temp.obj)
 					} else {
 						let temp = new Obj("green", Game.local.ground.model.green.obj.clone(),[])
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
-						scene.add(temp.obj)
+						Game.global.scene.add(temp.obj)
 					}
 				}
 			}
@@ -320,10 +329,10 @@ const Game         = {}
 						if (Game.local.ground.data[0][0].obj.position.z > 5){
 							switch (Game.local.ground.move.direction) {
 								case "straight" : {
-									if ( camera.rotation.y < 0) {
-										camera.rotation.y += 0.005
-									}else if(camera.rotation.y >= 0) {
-										camera.rotation.y -= 0.005
+									if ( Game.global.camera.rotation.y < 0) {
+										Game.global.camera.rotation.y += 0.005
+									}else if(Game.global.camera.rotation.y >= 0) {
+										Game.global.camera.rotation.y -= 0.005
 									}
 									Game.local.ground.move.push("straight")
 									Game.local.ground.move.shift()
@@ -331,10 +340,10 @@ const Game         = {}
 									Game.local.ground.model.green_a.material.opacity < 1 ? Game.local.ground.model.green_b.material.opacity += 0.05 : false
 								}break;	
 								case "left" : {
-									if ( camera.rotation.y < -0.25) {
-										camera.rotation.y += 0.025
-									}else if(camera.rotation.y > -0.25) {
-										camera.rotation.y -= 0.025
+									if ( Game.global.camera.rotation.y < -0.25) {
+										Game.global.camera.rotation.y += 0.025
+									}else if(Game.global.camera.rotation.y > -0.25) {
+										Game.global.camera.rotation.y -= 0.025
 									}
 									Game.local.ground.move.push("left")
 									Game.local.ground.move.shift()
@@ -342,10 +351,10 @@ const Game         = {}
 									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_b.material.opacity -= 0.1 : false
 								}break;	
 								case "right" : {
-									if ( camera.rotation.y < 0.25) {
-										camera.rotation.y += 0.025
-									}else if(camera.rotation.y > 0.25) {
-										camera.rotation.y -= 0.025
+									if ( Game.global.camera.rotation.y < 0.25) {
+										Game.global.camera.rotation.y += 0.025
+									}else if(Game.global.camera.rotation.y > 0.25) {
+										Game.global.camera.rotation.y -= 0.025
 									}
 									Game.local.ground.move.push("right")
 									Game.local.ground.move.shift()							
@@ -362,13 +371,13 @@ const Game         = {}
 			shift: function() {
 				let temp = Game.local.ground.data[0]  
 				temp.forEach(el=>{
-					scene.remove(el.obj)
+					Game.global.scene.remove(el.obj)
 					el.obj = null
 					delete el.obj
 					el.type = null
 					delete el.type
 					el.items.forEach(item=>{
-						scene.remove(item)
+						Game.global.scene.remove(item)
 						item = null
 					})
 					for(let i = 0; i < el.items.length; i++){
@@ -405,12 +414,12 @@ const Game         = {}
 						temp[i] = new Obj("way", Game.local.ground.model.brown.obj.clone(), [])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
-						scene.add(temp[i].obj)
+						Game.global.scene.add(temp[i].obj)
 					} else {
 						temp[i] = new Obj("green", Game.local.ground.model.green.obj.clone(), [])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
-						scene.add(temp[i].obj)
+						Game.global.scene.add(temp[i].obj)
 					}
 				}
 				//add black a
@@ -435,7 +444,7 @@ const Game         = {}
 							temp[5].items[0].position.x = Game.local.ground.move.convert_x(5)
 							temp[4].items[0].position.x = Game.local.ground.move.convert_x(4)
 							temp[9].items[0].position.z = temp[8].items[0].position.z = temp[7].items[0].position.z = temp[6].items[0].position.z = temp[5].items[0].position.z = temp[4].items[0].position.z =  Game.local.ground.move.convert_z(18)
-							scene.add(temp[9].items[0],
+							Game.global.scene.add(temp[9].items[0],
 								  temp[8].items[0],
 								  temp[7].items[0],
 								  temp[6].items[0],
@@ -458,7 +467,7 @@ const Game         = {}
 							temp[14].items[0].position.x = Game.local.ground.move.convert_x(14)
 							temp[15].items[0].position.x = Game.local.ground.move.convert_x(15)
 							temp[10].items[0].position.z = temp[11].items[0].position.z = temp[12].items[0].position.z = temp[13].items[0].position.z = temp[14].items[0].position.z = temp[15].items[0].position.z =  Game.local.ground.move.convert_z(18)
-							scene.add(temp[10].items[0],
+							Game.global.scene.add(temp[10].items[0],
 								  temp[11].items[0],
 								  temp[12].items[0],
 								  temp[13].items[0],
@@ -483,7 +492,7 @@ const Game         = {}
 							temp[0+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_b_place)
 							temp[1+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(1+seed_b_place)
 							temp[0+seed_b_place].items[0].position.z = temp[1+seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
-							scene.add(temp[0+seed_b_place].items[0],
+							Game.global.scene.add(temp[0+seed_b_place].items[0],
 								  temp[1+seed_b_place].items[0])
 						}break;
 						case 1 : {						
@@ -496,7 +505,7 @@ const Game         = {}
 							temp[18-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_b_place)
 							temp[17-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(17-seed_b_place)
 							temp[18-seed_b_place].items[0].position.z = temp[17-seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
-							scene.add(temp[18-seed_b_place].items[0],
+							Game.global.scene.add(temp[18-seed_b_place].items[0],
 								  temp[17-seed_b_place].items[0])
 					
 						}break;
@@ -515,7 +524,7 @@ const Game         = {}
 							temp[0+seed_c_place].items.unshift( Game.local.ground.model.black_c.obj.clone() )
 							temp[0+seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_c_place)
 							temp[0+seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
-							scene.add(temp[0+seed_c_place].items[0])
+							Game.global.scene.add(temp[0+seed_c_place].items[0])
 						}break;
 						case 1 : {						
 							let seed_c_place = Math.floor(Math.random()*8)+8
@@ -524,7 +533,7 @@ const Game         = {}
 							temp[18-seed_c_place].items.unshift( Game.local.ground.model.black_c.obj.clone() )			
 							temp[18-seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_c_place)
 							temp[18-seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
-							scene.add(temp[18-seed_c_place].items[0])					
+							Game.global.scene.add(temp[18-seed_c_place].items[0])					
 						}break;
 					} 
 				}
@@ -539,7 +548,7 @@ const Game         = {}
 							el.items.unshift( Game.local.ground.model.green_a.obj.clone() )
 							el.items[0].position.x = el.obj.position.x * 2
 							el.items[0].position.z = Game.local.ground.move.convert_z(18)
-							scene.add(el.items[0])
+							Game.global.scene.add(el.items[0])
 						}
 					}
 				})
@@ -550,7 +559,7 @@ const Game         = {}
 							el.items.unshift( Game.local.ground.model.green_b.obj.clone() )
 							el.items[0].position.x = el.obj.position.x * 2
 							el.items[0].position.z = Game.local.ground.move.convert_z(18)
-							scene.add(el.items[0])
+							Game.global.scene.add(el.items[0])
 						}
 					}
 				})
@@ -573,7 +582,7 @@ const Game         = {}
 			Game.local.sky.obj.name = "sky"
 			Game.local.sky.obj.position.z = -16
 			Game.local.sky.obj.scale.set(150,150,)
-			scene.add(Game.local.sky.obj)
+			Game.global.scene.add(Game.local.sky.obj)
 		}
 	//ou
 	Game.local.out = {
@@ -586,7 +595,7 @@ const Game         = {}
 			Game.local.out.obj.position.y = -0.1
 			Game.local.out.obj.scale.set(150,150,)
     			Game.local.out.obj.rotation.x = (-90*Math.PI)/180 
-			scene.add(Game.local.out.obj)
+			Game.global.scene.add(Game.local.out.obj)
 		}
 
 
@@ -656,23 +665,12 @@ Game.load = async function (){
 	let timer = setInterval( function() {
 		if(Game.global.car.loaded == true) {
 			clearInterval(timer)
+			Game.animate()
 			Game.global.status = true
 		}
 	},500)
 }
 
-//animate
-const animate = function () {
-
-	requestAnimationFrame( animate );
-
-	//cube.rotation.x += 0.01;
-	//cube.rotation.y += 0.01;
-
-	renderer.render( scene, camera );
-};
-
-animate();
 
 //control
 document.addEventListener("keydown", function(event){
@@ -742,7 +740,7 @@ let check = setInterval( function () {
 				Game.local.speed -= 0.25
 				Game.global.car.obj.position.z += 0.01
 			}
-			if(Game.global.score < 0) Game.global.speed = 0
+			if(Game.global.score < 0) Game.global.score = 0
 			if(Game.global.car.obj.position.z < 3.5) Game.global.car.obj.position.z += 0.05
 		})
 		Nav.score.el.innerHTML = ""+Game.global.score
