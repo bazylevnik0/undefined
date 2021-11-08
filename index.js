@@ -1,7 +1,8 @@
 import * as THREE from "/build/three.module.js" 
 import { GLTFLoader } from '/build/GLTFLoader.js';
 const loader_car_red = new GLTFLoader();
-
+const clock = new THREE.Clock();
+		
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
 		this.geometry = new THREE.PlaneGeometry();
@@ -118,7 +119,7 @@ const Select_map = {
 		Game.global.actual.film = Game.global.actual.map
 		Select_map.el.style.zIndex = -1
 		Movie.obj = new Image(); 
-		    Movie.obj.src = 'image1.png';
+		Movie.obj.src = 'image1.png';
 		Movie.el.appendChild(Movie.obj)
 		Movie.el.style.zIndex = 1
 		Game.load()
@@ -206,6 +207,8 @@ const Game         = {}
       Game.renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
       Game.animate = function () {
 	requestAnimationFrame( Game.animate );
+	let mixerUpdateDelta = clock.getDelta();
+	Game.global.car.animation.mixer !== undefined ? Game.global.car.animation.mixer.update( mixerUpdateDelta ) : false
 	Game.renderer.render( Game.global.scene, Game.global.camera );
       };
 
@@ -238,15 +241,14 @@ const Game         = {}
 		animation : {
 			arr : undefined,
 			mixer : undefined,
-			actions : undefined
+			actions_loop : undefined,
+			
 		}
 	 } 
 	    Game.global.car.build = function() {
 			function download(){
 			return new Promise ((resolve, reject) => {
-			switch (Game.global.actual.car) {
-				case "red" : {
-					loader_car_red.load( '/src/car_red.glb',  function ( gltf ) {
+					loader_car_red.load( '/src/car_'+Game.global.actual.car+'.glb',  function ( gltf ) {
 						let model = gltf.scene;
 						model.scale.set(0.5, 0.4, 0.6)
 						model.traverse( function ( object ) {
@@ -261,26 +263,17 @@ const Game         = {}
 						if( Game.global.car.obj !== undefined && Game.global.car.animation.mixer !== undefined) {
 							clearInterval(timer)
 							
-							Game.global.car.animation.actions = []
+							Game.global.car.animation.actions_loop = []
 							
-							Game.global.car.animation.actions[0] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 0 ] );
-							Game.global.car.animation.actions[1] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 1 ] );
-							Game.global.car.animation.actions[2] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 2 ] );
-							Game.global.car.animation.actions[3] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 3 ] );
+							Game.global.car.animation.actions_loop[0] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 0 ] );
+							Game.global.car.animation.actions_loop[1] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 1 ] );
+							Game.global.car.animation.actions_loop[2] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 2 ] );
+							Game.global.car.animation.actions_loop[3] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 3 ] );
 							
-							Game.global.car.animation.actions[0].play()
-							Game.global.car.animation.actions[1].play()
-							Game.global.car.animation.actions[2].play()
-							Game.global.car.animation.actions[3].play()
 							resolve(true)
 						}
 					},500)
 					})
-				}break;
-				case "blue": {
-					Game.global.car.obj = new THREE.Mesh( Game.global.car.geometry , Game.global.car.material )	
-				}break;
-			}
 			})
 			}
 			async function set() {
@@ -289,8 +282,7 @@ const Game         = {}
 			Game.global.car.obj.position.z = 4
 			Game.global.car.obj.position.y = 0.15
 			Game.global.scene.add(Game.global.car.obj)
-			console.log(Game.global.car.animation.actions)
-			//Game.global.car.animation.actions.forEach( el=> el.reset().play() )
+			Game.global.car.animation.actions_loop.forEach( el=> el.reset().play() )
  			Game.global.car.loaded = true
 			}set()
 	    }
@@ -758,7 +750,7 @@ let check = setInterval( function () {
 		let actual = Game.global.car.obj.position.x
 		Game.local.ground.data[3].forEach( el=> {
 			if(el.type == "black_a"){
-				if( actual > el.obj.position.x - 0.5 &&  actual < el.obj.position.x +0.5) {
+				if( actual > el.obj.position.x - 0.25 &&  actual < el.obj.position.x +0.25) {
 					console.log("catch_a")
 					Game.local.ground.move.status = false
 				} 
