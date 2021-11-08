@@ -1,4 +1,6 @@
-import * as THREE from "/build/three.module.js" import { GLTFLoader } from '/build/GLTFLoader.js';
+import * as THREE from "/build/three.module.js" 
+import { GLTFLoader } from '/build/GLTFLoader.js';
+const loader_car_red = new GLTFLoader();
 
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
@@ -153,6 +155,9 @@ const Game         = {}
 	  global.
 		scene
 		camera
+		light
+			ambient
+			point
 		actual.
 			car
 			map
@@ -220,33 +225,74 @@ const Game         = {}
          Game.global.camera.position.z = 6;
          Game.global.camera.position.y = 1;
          Game.global.camera.rotation.x = (-10*Math.PI)/180
-
+	 Game.global.light = {}
+	 Game.global.light.ambient = new THREE.AmbientLight( 0x404040 )
+	 Game.global.light.point = new THREE.PointLight( 0xffffff, 1, 100 );
+	 Game.global.light.point.position.set( 0, 20, 10 );
+	 Game.global.scene.add( Game.global.light.ambient , Game.global.light.point );
 		
          Game.global.car = {
 		geometry : new THREE.BoxGeometry(),
 		material : new THREE.MeshBasicMaterial( { color: 0xffffff } ),
-		loaded   : false
+		loaded   : false,
+		animation : {
+			arr : undefined,
+			mixer : undefined,
+			actions : undefined
+		}
 	 } 
 	    Game.global.car.build = function() {
+			function download(){
+			return new Promise ((resolve, reject) => {
 			switch (Game.global.actual.car) {
 				case "red" : {
-					Game.global.car.obj = new THREE.Mesh( Game.global.car.geometry , Game.global.car.material )	
-		
+					loader_car_red.load( '/src/car_red.glb',  function ( gltf ) {
+						let model = gltf.scene;
+						model.scale.set(0.5, 0.4, 0.6)
+						model.traverse( function ( object ) {
+							if ( object.isMesh ) object.castShadow = true;
+						} );					
+
+
+					Game.global.car.obj = model
+					Game.global.car.animation.arr = gltf.animations;
+					Game.global.car.animation.mixer = new THREE.AnimationMixer( model );
+					let timer = setInterval( function() {
+						if( Game.global.car.obj !== undefined && Game.global.car.animation.mixer !== undefined) {
+							clearInterval(timer)
+							
+							Game.global.car.animation.actions = []
+							
+							Game.global.car.animation.actions[0] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 0 ] );
+							Game.global.car.animation.actions[1] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 1 ] );
+							Game.global.car.animation.actions[2] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 2 ] );
+							Game.global.car.animation.actions[3] = Game.global.car.animation.mixer.clipAction( Game.global.car.animation.arr[ 3 ] );
+							
+							Game.global.car.animation.actions[0].play()
+							Game.global.car.animation.actions[1].play()
+							Game.global.car.animation.actions[2].play()
+							Game.global.car.animation.actions[3].play()
+							resolve(true)
+						}
+					},500)
+					})
 				}break;
 				case "blue": {
 					Game.global.car.obj = new THREE.Mesh( Game.global.car.geometry , Game.global.car.material )	
 				}break;
 			}
+			})
+			}
+			async function set() {
+			await download();
 			Game.global.car.obj.name = "car"
 			Game.global.car.obj.position.z = 4
-			Game.global.car.obj.scale.set(1,1,2)
+			Game.global.car.obj.position.y = 0.15
 			Game.global.scene.add(Game.global.car.obj)
-			let timer = setInterval( ()=> {
-				if(Game.global.car.obj !== undefined){
-					clearInterval(timer)
-					Game.global.car.loaded = true
-				}
-			},100)
+			console.log(Game.global.car.animation.actions)
+			//Game.global.car.animation.actions.forEach( el=> el.reset().play() )
+ 			Game.global.car.loaded = true
+			}set()
 	    }
       //l
       Game.local  = {
