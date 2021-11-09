@@ -1,6 +1,14 @@
 import * as THREE from "/build/three.module.js" 
 import { GLTFLoader } from '/build/GLTFLoader.js';
-const loader_car_red = new GLTFLoader();
+const loader_green    = new GLTFLoader();
+const loader_brown    = new GLTFLoader();
+const loader_green_a  = new GLTFLoader();
+const loader_green_b  = new GLTFLoader();
+const loader_black_a  = new GLTFLoader();
+const loader_black_b  = new GLTFLoader();
+const loader_black_c  = new GLTFLoader();
+
+const loader_car_red    = new GLTFLoader();
 const loader_car_anim_a = new GLTFLoader();
 const loader_car_anim_b = new GLTFLoader();
 const loader_car_anim_c = new GLTFLoader();
@@ -25,6 +33,7 @@ const Plane  = function(color,x,z,w,h,v) {
 		this.obj.name = "ground_plane_"+(""+Math.random()).slice(2,)
 		this.obj.position.x = x
 		this.obj.position.z = z
+		this.items = []
 		if(v)this.obj.rotation.x = (-90*Math.PI)/180 
 		if(w)this.obj.scale.x = w
 		if(h)this.obj.scale.y = h
@@ -61,8 +70,9 @@ const Obj = function(type,obj,items) {
 	this.type = type;
 	this.obj  = obj;
 	this.items = items;
-	this.items.forEach( el=> { scene.add(el) })
+	this.items.forEach( el=> { Game.global.scene.add(el) })
 }
+
 
 //structure
 const Movie        = {
@@ -126,7 +136,13 @@ const Select_map = {
 		Movie.obj.src = 'image1.png';
 		Movie.el.appendChild(Movie.obj)
 		Movie.el.style.zIndex = 1
-		Game.load()
+		backLoad()
+		let load = setInterval( ()=>{
+			if( back_load.green !== undefined ) {
+				clearInterval(load)
+				Game.load()
+			}
+		},100)
 		setTimeout( ()=> {
 			let timer = setInterval( ()=>{
 				if( Game.global.status == true) {
@@ -448,11 +464,14 @@ const Game         = {}
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
 						Game.global.scene.add(temp.obj)
 					} else {
-						let temp = new Obj("green", Game.local.ground.model.green.obj.clone(),[])
+						let temp = new Obj("green", Game.local.ground.model.green.obj.clone(),[back_load.green.clone()])
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
-						Game.global.scene.add(temp.obj)
+						temp.items[0].position.x = temp.obj.position.x 
+						temp.items[0].position.z = temp.obj.position.z
+						temp.items[0].position.y = 0.05
+						Game.global.scene.add(temp.obj,temp.items[0])
 					}
 				}
 			}
@@ -574,10 +593,13 @@ const Game         = {}
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
 						Game.global.scene.add(temp[i].obj)
 					} else {
-						temp[i] = new Obj("green", Game.local.ground.model.green.obj.clone(), [])
+						temp[i] = new Obj("green", Game.local.ground.model.green.obj.clone(), [back_load.green.clone()])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
-						Game.global.scene.add(temp[i].obj)
+						temp[i].items[0].position.x = temp[i].obj.position.x 
+						temp[i].items[0].position.z = temp[i].obj.position.z
+						temp[i].items[0].position.y = 0.05
+						Game.global.scene.add(temp[i].obj,temp[i].items[0])
 					}
 				}
 				//add black a				
@@ -818,6 +840,7 @@ Game.load = async function (){
 	Game.local.ground.move.run()
 	Game.global.car.build()
 
+		
 	let timer = setInterval( function() {
 		if(Game.global.car.loaded == true) {
 			clearInterval(timer)
@@ -916,5 +939,28 @@ let check = setInterval( function () {
 		Nav.speed.el.innerHTML = ""+Game.local.speed
 	} 
 },50)
+
+//backload
+var back_load = {}
+function backLoad(){
+	switch (Game.global.actual.map){
+		case "nature" : {
+			loader_green.load( '/src/green_n.glb',  function ( gltf ) {
+					let model = gltf.scene;
+					model.scale.set(1, 0.25, 1)
+					model.traverse( function ( object ) {
+						if ( object.isMesh ) object.castShadow = true;
+					} );
+					back_load.green = model
+					console.log(back_load)
+			})
+					console.log(back_load)
+		}break;
+		case "city" : {
+		}break;
+		case "cyber" : {
+		}break;
+	}
+}
 
 //system
