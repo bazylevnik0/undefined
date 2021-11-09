@@ -215,6 +215,8 @@ const Game         = {}
 	Game.global.car.animation.mixer !== undefined ? Game.global.car.animation.mixer.update( mixerUpdateDelta ) : false
 	Game.global.car.animation.action.a_a.mixer !== undefined ? Game.global.car.animation.action.a_a.mixer.update( mixerUpdateDelta ) : false
 	Game.global.car.animation.action.a_b.mixer !== undefined ? Game.global.car.animation.action.a_b.mixer.update( mixerUpdateDelta ) : false
+	Game.global.car.animation.action.a_c.mixer !== undefined ? Game.global.car.animation.action.a_c.mixer.update( mixerUpdateDelta ) : false
+	Game.global.car.animation.action.a_s.mixer !== undefined ? Game.global.car.animation.action.a_s.mixer.update( mixerUpdateDelta ) : false
 	Game.renderer.render( Game.global.scene, Game.global.camera );
       };
 
@@ -270,7 +272,6 @@ const Game         = {}
 				a_b : {
 					obj : undefined,
 					run : function() {
-						console.log( Game.global.car.animation.action.a_b.actions )
 						Game.global.car.animation.action.a_b.obj.position.x = Game.global.car.obj.position.x
 						Game.global.car.animation.action.a_b.obj.position.z = Game.global.car.obj.position.z
 						Game.global.car.animation.action.a_b.actions.forEach( el=> el.play() )
@@ -280,7 +281,10 @@ const Game         = {}
 				a_c : {
 					obj : undefined,
 					run : function() {
-
+						Game.global.car.animation.action.a_c.obj.position.x = Game.global.car.obj.position.x
+						Game.global.car.animation.action.a_c.obj.position.z = Game.global.car.obj.position.z
+						Game.global.car.animation.action.a_c.actions.forEach( el=> el.play() )
+						setTimeout( ()=> Game.global.car.animation.action.a_c.actions.forEach( el=> el.stop()) ,500)
 					}
 				},
 				a_s : {
@@ -288,10 +292,13 @@ const Game         = {}
 					anim : function(log) {
 						switch (log) {
 							case true : {
-
+								Game.global.car.animation.action.a_s.obj.position.x = Game.global.car.obj.position.x
+								Game.global.car.animation.action.a_s.obj.position.z = Game.global.car.obj.position.z
+								Game.global.car.animation.action.a_s.actions.forEach( el=> el.play() )
 							}break;
 							case false : {
-
+								Game.global.car.animation.action.a_s.obj.position.z = 10
+								Game.global.car.animation.action.a_s.actions.forEach( el=> el.stop())
 							}break;
 						}
 					}
@@ -341,8 +348,7 @@ const Game         = {}
 			}set()
 			//anims
 			let temp = ["a","b","c","s"]
-			for (let i = 0; i < 2; i++){
-				console.log(i)
+			for (let i = 0; i < 4; i++){
 				let temp_loader
 				let temp_obj
 				let temp_length
@@ -358,10 +364,19 @@ const Game         = {}
 						temp_obj = Game.global.car.animation.action.a_b;
 						temp_length = 2;
 					}break;
+					case "c" : {
+						console.log("c")
+						temp_loader = loader_car_anim_c;
+						temp_obj = Game.global.car.animation.action.a_c;
+						temp_length = 1;
+					}break;
+					case "s" : {
+						console.log("s")
+						temp_loader = loader_car_anim_s;
+						temp_obj = Game.global.car.animation.action.a_s;
+						temp_length = 2;
+					}break;
 				}
-				console.log(temp)
-				console.log(i)
-				console.log(temp[i])
 				temp_loader.load( '/src/anim_' + temp[i] +'.glb',  function ( gltf ) {
 					let model = gltf.scene;
 					model.scale.set(0.5, 0.4, 0.6)
@@ -374,7 +389,6 @@ const Game         = {}
 						if( temp_obj.obj !== undefined ) {
 						clearInterval(timer)
 						temp_obj.arr = gltf.animations;
-						console.log(temp_obj.arr)
 						temp_obj.mixer = new THREE.AnimationMixer( model );
 						temp_obj.actions = []
 						for (let j = 0; j < temp_length; j++) {
@@ -566,8 +580,8 @@ const Game         = {}
 						Game.global.scene.add(temp[i].obj)
 					}
 				}
-				//add black a				//!
-				let seed_a = Math.floor(Math.random()*10)
+				//add black a				
+				let seed_a = Math.floor(Math.random()*50)
 				if(Game.local.ground.move.direction !== "straight") seed_a = 1
 				if  (seed_a == 0) {
 					let seed_a_dir = Math.floor(Math.random()*15)
@@ -621,7 +635,7 @@ const Game         = {}
 					} 
 				}
 				//add black b
-				let seed_b = Math.floor(Math.random()*30)
+				let seed_b = Math.floor(Math.random()*25)
 				if(Game.local.ground.move.direction !== "straight") seed_b = 1
 				if  (seed_b == 0) {
 					let seed_b_dir = Math.floor(Math.random()*2)
@@ -863,6 +877,7 @@ let check = setInterval( function () {
 					Game.global.car.animation.action.a_a.run()
 					Game.local.ground.move.status = false
 					clearInterval(check)
+					Game.global.car.animation.action.a_s.anim(false)
 				} 
 			}
 			if(el.type == "black_b"){
@@ -886,16 +901,20 @@ let check = setInterval( function () {
 				} 
 			}
 			if(Game.local.speed  < 0) Game.local.speed = 0.0
+			if(Game.local.speed  > 2) {
+				Game.global.car.animation.action.a_s.anim(true)
+			} else 	Game.global.car.animation.action.a_s.anim(false)
 			if(Game.local.speed  >  Game.local.limit * 1.25) {
 				Game.local.speed -= 0.25
 				Game.global.car.obj.position.z += 0.01
 			}
 			if(Game.global.score < 0) Game.global.score = 0
 			if(Game.global.car.obj.position.z < 3.5) Game.global.car.obj.position.z += 0.05
-		})
+		}) 
+		
 		Nav.score.el.innerHTML = ""+Game.global.score
 		Nav.speed.el.innerHTML = ""+Game.local.speed
-	}
+	} 
 },50)
 
 //system
