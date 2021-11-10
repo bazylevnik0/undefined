@@ -228,7 +228,6 @@ const Game         = {}
 			black_c
 		
       */
-
       //g
       Game.canvas = {}
       Game.canvas.el = document.getElementById("canvas")
@@ -623,48 +622,16 @@ const Game         = {}
 						case 0 : {					
 							temp[9].obj.material = temp[8].obj.material = temp[7].obj.material = temp[6].obj.material = temp[5].obj.material = temp[4].obj.material = Game.local.ground.model.black.obj.material
 							temp[9].type =	temp[8].type =	temp[7].type =	temp[6].type = temp[5].type = temp[4].type = "black_a"
-							temp[9].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[8].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[7].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[6].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[5].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[4].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[9].items[0].position.x = Game.local.ground.move.convert_x(9)
-							temp[8].items[0].position.x = Game.local.ground.move.convert_x(8)
-							temp[7].items[0].position.x = Game.local.ground.move.convert_x(7)
-							temp[6].items[0].position.x = Game.local.ground.move.convert_x(6)
-							temp[5].items[0].position.x = Game.local.ground.move.convert_x(5)
-							temp[4].items[0].position.x = Game.local.ground.move.convert_x(4)
-							temp[9].items[0].position.z = temp[8].items[0].position.z = temp[7].items[0].position.z = temp[6].items[0].position.z = temp[5].items[0].position.z = temp[4].items[0].position.z =  Game.local.ground.move.convert_z(18)
-							Game.global.scene.add(temp[9].items[0],
-								  temp[8].items[0],
-								  temp[7].items[0],
-								  temp[6].items[0],
-								  temp[5].items[0],
-								  temp[4].items[0])
+							temp[7].items.unshift( Game.backload.model.black_a.clone() )
+							temp[7].items[0].position.z = Game.local.ground.move.convert_z(18)
+							Game.global.scene.add( temp[7].items[0] )
 						}break;
 						case 1 : {
 							temp[10].obj.material = temp[11].obj.material = temp[12].obj.material = temp[13].obj.material = temp[14].obj.material = temp[15].obj.material = Game.local.ground.model.black.obj.material
 							temp[10].type =	temp[11].type =	temp[12].type =	temp[13].type = temp[14].type = temp[15].type = "black_a"
-							temp[10].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[11].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[12].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[13].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[14].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[15].items.unshift( Game.local.ground.model.black_a.obj.clone() )
-							temp[10].items[0].position.x = Game.local.ground.move.convert_x(10)
-							temp[11].items[0].position.x = Game.local.ground.move.convert_x(11)
-							temp[12].items[0].position.x = Game.local.ground.move.convert_x(12)
-							temp[13].items[0].position.x = Game.local.ground.move.convert_x(13)
-							temp[14].items[0].position.x = Game.local.ground.move.convert_x(14)
-							temp[15].items[0].position.x = Game.local.ground.move.convert_x(15)
-							temp[10].items[0].position.z = temp[11].items[0].position.z = temp[12].items[0].position.z = temp[13].items[0].position.z = temp[14].items[0].position.z = temp[15].items[0].position.z =  Game.local.ground.move.convert_z(18)
-							Game.global.scene.add(temp[10].items[0],
-								  temp[11].items[0],
-								  temp[12].items[0],
-								  temp[13].items[0],
-								  temp[14].items[0],
-								  temp[15].items[0])
+							temp[13].items.unshift( Game.backload.model.black_a.clone() )
+							temp[13].items[0].position.z = Game.local.ground.move.convert_z(18)
+							Game.global.scene.add( temp[13].items[0] )
 						}break;
 					} 
 				}
@@ -679,26 +646,19 @@ const Game         = {}
 							temp[0+seed_b_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[1+seed_b_place].obj.material = Game.local.ground.model.black.obj.material			
 							temp[0+seed_b_place].type =	temp[1+seed_b_place].type = "black_b"
-							temp[0+seed_b_place].items.unshift( Game.local.ground.model.black_b.obj.clone() )
-							temp[1+seed_b_place].items.unshift( Game.local.ground.model.black_b.obj.clone() )
-							temp[0+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_b_place)
+							temp[0+seed_b_place].items.unshift( Game.backload.model.black_b.clone() )
 							temp[1+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(1+seed_b_place)
-							temp[0+seed_b_place].items[0].position.z = temp[1+seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
-							Game.global.scene.add(temp[0+seed_b_place].items[0],
-								  temp[1+seed_b_place].items[0])
+							temp[0+seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
+							Game.global.scene.add(temp[0+seed_b_place].items[0])
 						}break;
 						case 1 : {						
 							let seed_b_place = Math.floor(Math.random()*8)+4
 							temp[18-seed_b_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[17-seed_b_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[18-seed_b_place].type =	temp[17-seed_b_place].type = "black_b"
-							temp[18-seed_b_place].items.unshift( Game.local.ground.model.black_b.obj.clone() )
-							temp[17-seed_b_place].items.unshift( Game.local.ground.model.black_b.obj.clone() )
-							temp[18-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_b_place)
+							temp[17-seed_b_place].items.unshift( Game.backload.model.black_b.clone() )
 							temp[17-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(17-seed_b_place)
-							temp[18-seed_b_place].items[0].position.z = temp[17-seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
-							Game.global.scene.add(temp[18-seed_b_place].items[0],
-								  temp[17-seed_b_place].items[0])
+							Game.global.scene.add(temp[17-seed_b_place].items[0])
 					
 						}break;
 					} 
@@ -713,7 +673,8 @@ const Game         = {}
 							let seed_c_place = Math.floor(Math.random()*8)+8
 							temp[0+seed_c_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[0+seed_c_place].type = "black_c"
-							temp[0+seed_c_place].items.unshift( Game.local.ground.model.black_c.obj.clone() )
+							temp[0+seed_c_place].items.unshift( Game.backload.model.black_c.clone() )
+							temp[0+seed_c_place].items[0].rotation.y = (Math.floor(Math.random()*5)*90)*Math.PI/180
 							temp[0+seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_c_place)
 							temp[0+seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
 							Game.global.scene.add(temp[0+seed_c_place].items[0])
@@ -722,7 +683,8 @@ const Game         = {}
 							let seed_c_place = Math.floor(Math.random()*8)+8
 							temp[18-seed_c_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[18-seed_c_place].type = "black_c"
-							temp[18-seed_c_place].items.unshift( Game.local.ground.model.black_c.obj.clone() )			
+							temp[18-seed_c_place].items.unshift( Game.backload.model.black_c.clone() )
+							temp[18-seed_c_place].items[0].rotation.y = (Math.floor(Math.random()*5)*90)*Math.PI/180
 							temp[18-seed_c_place].items[0].position.x = Game.local.ground.move.convert_x(18-seed_c_place)
 							temp[18-seed_c_place].items[0].position.z = Game.local.ground.move.convert_z(18)
 							Game.global.scene.add(temp[18-seed_c_place].items[0])					
@@ -828,16 +790,7 @@ Game.preload = function () {
     				Game.local.ground.model.green_b = new Box("green",0,0,6,3,3,3,)
 			}break;
 		}
-   
-	 	Game.local.ground.model.green_a.material.transparent = true
- 		Game.local.ground.model.green_b.material.transparent = true
-    		Game.local.ground.model.black_a.material.transparent = true
-    		Game.local.ground.model.black_a.material.opacity = 0.25
-    		Game.local.ground.model.black_b.material.transparent = true
-    		Game.local.ground.model.black_b.material.opacity = 0.25
-    		Game.local.ground.model.black_c.material.transparent = true
-    		Game.local.ground.model.black_c.material.opacity = 0.25
-   		
+   			
 		let timer = setInterval( function() {
 			if(Game.local.ground.model.green_b!==undefined){
 				clearInterval(timer)
@@ -871,6 +824,30 @@ Game.backload = {
 			case "nature" : {
 																		//!!REVERS AFTER TESTING!
 
+				loader_black_a.load( '/src/black_a_n.glb',  function ( gltf ) {
+					let model = gltf.scene;
+					model.scale.set(1, 0.6, 0.6)
+					model.traverse( function ( object ) {
+						if ( object.isMesh ) object.castShadow = true;
+					} );
+					Game.backload.model.black_a = model
+				})
+				loader_black_b.load( '/src/black_b_n.glb',  function ( gltf ) {
+					let model = gltf.scene;
+					model.scale.set(0.6, 0.4, 0.4)
+					model.traverse( function ( object ) {
+						if ( object.isMesh ) object.castShadow = true;
+					} );
+					Game.backload.model.black_b = model
+				})
+				loader_black_c.load( '/src/black_c_n.glb',  function ( gltf ) {
+					let model = gltf.scene;
+					model.scale.set(1, 1, 1)
+					model.traverse( function ( object ) {
+						if ( object.isMesh ) object.castShadow = true;
+					} );
+					Game.backload.model.black_c = model
+				})
 				loader_green_b.load( '/src/green_b_n.glb',  function ( gltf ) {
 					let model = gltf.scene;
 					model.scale.set(0.3, 0.3, 0.5)
@@ -954,7 +931,7 @@ let check = setInterval( function () {
 		if(Game.global.car.obj.position.x < 0) Game.global.car.obj.position.x += 0.1
 		//collisions
 		let actual = Game.global.car.obj.position.x
-		Game.local.ground.data[3].forEach( el=> {
+		Game.local.ground.data[5].forEach( el=> {
 			if(el.type == "black_a"){
 				if( actual > el.obj.position.x - 0.25 &&  actual < el.obj.position.x +0.25) {
 					console.log("catch_a")
@@ -964,7 +941,7 @@ let check = setInterval( function () {
 				} 
 			}
 			if(el.type == "black_b"){
-				if( actual > el.obj.position.x - 1 &&  actual < el.obj.position.x +1) {
+				if( actual > el.obj.position.x - 1.0 &&  actual < el.obj.position.x +1.0) {
 					console.log("catch_b")	
 					Game.global.car.animation.action.a_b.run()
 					Game.local.speed /= 3
