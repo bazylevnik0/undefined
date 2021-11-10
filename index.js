@@ -136,9 +136,9 @@ const Select_map = {
 		Movie.obj.src = 'image1.png';
 		Movie.el.appendChild(Movie.obj)
 		Movie.el.style.zIndex = 1
-		backLoad()
+		Game.backload.load()
 		let load = setInterval( ()=>{
-			if( back_load.green !== undefined ) {
+			if( Game.backload.model.green !== undefined ) {
 				clearInterval(load)
 				Game.load()
 			}
@@ -215,8 +215,18 @@ const Game         = {}
 		   obj
 		   items[]
 		   build()
-	preload
-	load
+	preload()
+	load()
+	backload.
+		 model.
+			brown
+			green
+			green_a
+			green_b
+			black_a
+			black_b
+			black_c
+		
       */
 
       //g
@@ -274,15 +284,15 @@ const Game         = {}
 						Game.global.car.animation.action.a_a.obj.position.z = Game.global.car.obj.position.z
 						Game.global.car.animation.action.a_a.actions.forEach( el=> el.reset().play() )
 						Game.global.car.animation.actions_loop.forEach( el=>  el.stop())
-						let k = 100
+						Game.global.car.animation.action.a_s.anim(false)
+						let k = 25	
 						let timer = setInterval( function() {	
 							if (k > 0) {
 								Game.global.car.obj.rotation.y -= k/50
-								k--
+								k-=0.5
 							} else clearInterval(timer)
 						})
-						setTimeout( ()=> Game.global.car.animation.action.a_a.actions.forEach( el=> el.stop()) ,2500)
-					
+						setTimeout( ()=> Game.global.car.animation.action.a_a.actions.forEach( el=> el.stop()) ,10000)
 					}
 				},
 				a_b : {
@@ -314,7 +324,7 @@ const Game         = {}
 							}break;
 							case false : {
 								Game.global.car.animation.action.a_s.obj.position.z = 10
-								Game.global.car.animation.action.a_s.actions.forEach( el=> el.stop())
+								setTimeout( ()=> Game.global.car.animation.action.a_s.actions.forEach( el=> el.stop()) ,250)
 							}break;
 						}
 					}
@@ -357,7 +367,7 @@ const Game         = {}
 			await download();
 			Game.global.car.obj.name = "car"
 			Game.global.car.obj.position.z = 4
-			Game.global.car.obj.position.y = 0.15
+			Game.global.car.obj.position.y = 0.25
 			Game.global.scene.add(Game.global.car.obj)
 			Game.global.car.animation.actions_loop.forEach( el=> el.reset().play() )
  			Game.global.car.loaded = true
@@ -458,19 +468,23 @@ const Game         = {}
 			for (let j = 0; j <= 18; j++){
 				for (let i = 0; i <= 18 ; i++){
 					if(i >= 8 && i <= 12 || j % 2 == 0) {
-						let temp = new Obj("way", Game.local.ground.model.brown.obj.clone(),[])
+						let temp = new Obj("way", Game.local.ground.model.brown.obj.clone(),[Game.backload.model.brown.clone()])
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
-						Game.global.scene.add(temp.obj)
+						temp.items[0].position.x = temp.obj.position.x 
+						temp.items[0].position.z = temp.obj.position.z
+						temp.items[0].position.y = 0.1
+						Game.global.scene.add(temp.obj,temp.items[0])
 					} else {
-						let temp = new Obj("green", Game.local.ground.model.green.obj.clone(),[back_load.green.clone()])
+						let temp = new Obj("green", Game.local.ground.model.green.obj.clone(),[Game.backload.model.green.clone()])
 						Game.local.ground.data[j].push(temp)
 						temp.obj.position.x = Game.local.ground.move.convert_x(i)
 						temp.obj.position.z = Game.local.ground.move.convert_z(j)
 						temp.items[0].position.x = temp.obj.position.x 
 						temp.items[0].position.z = temp.obj.position.z
 						temp.items[0].position.y = 0.05
+						temp.items[0].rotation.y = (Math.floor(Math.random()*5)*90)*Math.PI/180
 						Game.global.scene.add(temp.obj,temp.items[0])
 					}
 				}
@@ -513,8 +527,6 @@ const Game         = {}
 									}
 									Game.local.ground.move.push("straight")
 									Game.local.ground.move.shift()
-									Game.local.ground.model.green_a.material.opacity < 1 ? Game.local.ground.model.green_a.material.opacity += 0.05 : false
-									Game.local.ground.model.green_a.material.opacity < 1 ? Game.local.ground.model.green_b.material.opacity += 0.05 : false
 								}break;	
 								case "left" : {
 									if ( Game.global.camera.rotation.y < -0.25) {
@@ -524,8 +536,6 @@ const Game         = {}
 									}
 									Game.local.ground.move.push("left")
 									Game.local.ground.move.shift()
-									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_a.material.opacity -= 0.1 : false
-									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_b.material.opacity -= 0.1 : false
 								}break;	
 								case "right" : {
 									if ( Game.global.camera.rotation.y < 0.25) {
@@ -535,8 +545,6 @@ const Game         = {}
 									}
 									Game.local.ground.move.push("right")
 									Game.local.ground.move.shift()							
-									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_a.material.opacity -= 0.1 : false
-									Game.local.ground.model.green_a.material.opacity > 0.4 ? Game.local.ground.model.green_b.material.opacity -= 0.1 : false
 								}break;
 							}
 						}
@@ -588,12 +596,16 @@ const Game         = {}
 				let temp = []
 				for (let i = 0; i <= 18 ; i++){
 					if(i >= (Game.local.track.pos + 10)-3 && i <= (Game.local.track.pos + 10)+3 ) {
-						temp[i] = new Obj("way", Game.local.ground.model.brown.obj.clone(), [])
+						temp[i] = new Obj("way", Game.local.ground.model.brown.obj.clone(), [Game.backload.model.brown.clone()])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
+						temp[i].items[0].position.x = temp[i].obj.position.x 
+						temp[i].items[0].position.z = temp[i].obj.position.z
+						temp[i].items[0].position.y = 0.05
+						temp[i].items[0].rotation.y = (Math.floor(Math.random()*5)*90)*Math.PI/180
 						Game.global.scene.add(temp[i].obj)
 					} else {
-						temp[i] = new Obj("green", Game.local.ground.model.green.obj.clone(), [back_load.green.clone()])
+						temp[i] = new Obj("green", Game.local.ground.model.green.obj.clone(), [Game.backload.model.green.clone()])
 						temp[i].obj.position.x = Game.local.ground.move.convert_x(i)
 						temp[i].obj.position.z = Game.local.ground.move.convert_z(18)
 						temp[i].items[0].position.x = temp[i].obj.position.x 
@@ -725,9 +737,10 @@ const Game         = {}
 					if(el.type == "green") {
 						let rand = Math.floor(Math.random()*k*10*3)
 						if (rand == 0){
-							el.items.unshift( Game.local.ground.model.green_a.obj.clone() )
+							el.items.unshift( Game.backload.model.green_a.clone() )
 							el.items[0].position.x = el.obj.position.x * 2
 							el.items[0].position.z = Game.local.ground.move.convert_z(18)
+							el.items[0].rotation.y = (Math.floor(Math.random()*5)*90)*Math.PI/180
 							Game.global.scene.add(el.items[0])
 						}
 					}
@@ -736,9 +749,11 @@ const Game         = {}
 					if(el.type == "green"){
 						let rand = Math.floor(Math.random()*k*10)
 						if (rand == 0){
-							el.items.unshift( Game.local.ground.model.green_b.obj.clone() )
+							el.items.unshift( Game.backload.model.green_b.clone() )
 							el.items[0].position.x = el.obj.position.x * 2
+							el.items[0].position.y = 0.25
 							el.items[0].position.z = Game.local.ground.move.convert_z(18)
+							el.items[0].rotation.y = (Math.floor(Math.random()*5)*90)*Math.PI/180
 							Game.global.scene.add(el.items[0])
 						}
 					}
@@ -840,7 +855,6 @@ Game.load = async function (){
 	Game.local.ground.move.run()
 	Game.global.car.build()
 
-		
 	let timer = setInterval( function() {
 		if(Game.global.car.loaded == true) {
 			clearInterval(timer)
@@ -849,7 +863,54 @@ Game.load = async function (){
 		}
 	},500)
 }
+//backload
+Game.backload = {
+	model : {},
+	load  : function() {
+		switch (Game.global.actual.map){
+			case "nature" : {
+																		//!!REVERS AFTER TESTING!
 
+				loader_green_b.load( '/src/green_b_n.glb',  function ( gltf ) {
+					let model = gltf.scene;
+					model.scale.set(0.3, 0.3, 0.5)
+					model.traverse( function ( object ) {
+						if ( object.isMesh ) object.castShadow = true;
+					} );
+					Game.backload.model.green_b = model
+				})
+				loader_green_a.load( '/src/green_a_n.glb',  function ( gltf ) {
+					let model = gltf.scene;
+					model.scale.set(0.5, 0.5, 0.5)
+					model.traverse( function ( object ) {
+						if ( object.isMesh ) object.castShadow = true;
+					} );
+					Game.backload.model.green_a = model
+				})
+				loader_brown.load( '/src/brown_n.glb',  function ( gltf ) {
+					let model = gltf.scene;
+					model.scale.set(1, 0.25, 1)
+					model.traverse( function ( object ) {
+						if ( object.isMesh ) object.castShadow = true;
+					} );
+					Game.backload.model.brown = model
+				})
+				loader_green.load( '/src/green_n.glb',  function ( gltf ) {
+					let model = gltf.scene;
+					model.scale.set(1, 0.25, 1)
+					model.traverse( function ( object ) {
+						if ( object.isMesh ) object.castShadow = true;
+					} );
+					Game.backload.model.green = model
+				})
+				}break;
+			case "city" : {
+				}break;
+			case "cyber" : {
+				}break;
+		}
+	}
+}
 
 //control
 document.addEventListener("keydown", function(event){
@@ -900,7 +961,6 @@ let check = setInterval( function () {
 					Game.global.car.animation.action.a_a.run()
 					Game.local.ground.move.status = false
 					clearInterval(check)
-					Game.global.car.animation.action.a_s.anim(false)
 				} 
 			}
 			if(el.type == "black_b"){
@@ -939,28 +999,4 @@ let check = setInterval( function () {
 		Nav.speed.el.innerHTML = ""+Game.local.speed
 	} 
 },50)
-
-//backload
-var back_load = {}
-function backLoad(){
-	switch (Game.global.actual.map){
-		case "nature" : {
-			loader_green.load( '/src/green_n.glb',  function ( gltf ) {
-					let model = gltf.scene;
-					model.scale.set(1, 0.25, 1)
-					model.traverse( function ( object ) {
-						if ( object.isMesh ) object.castShadow = true;
-					} );
-					back_load.green = model
-					console.log(back_load)
-			})
-					console.log(back_load)
-		}break;
-		case "city" : {
-		}break;
-		case "cyber" : {
-		}break;
-	}
-}
-
 //system
