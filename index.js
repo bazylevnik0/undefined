@@ -1,19 +1,5 @@
 import * as THREE from "/build/three.module.js" 
 import { GLTFLoader } from '/build/GLTFLoader.js';
-const loader_green    = new GLTFLoader();
-const loader_brown    = new GLTFLoader();
-const loader_green_a  = new GLTFLoader();
-const loader_green_b  = new GLTFLoader();
-const loader_black_a  = new GLTFLoader();
-const loader_black_b  = new GLTFLoader();
-const loader_black_c  = new GLTFLoader();
-
-const loader_car_red    = new GLTFLoader();
-const loader_car_anim_a = new GLTFLoader();
-const loader_car_anim_b = new GLTFLoader();
-const loader_car_anim_c = new GLTFLoader();
-const loader_car_anim_s = new GLTFLoader();
-const clock = new THREE.Clock();
 		
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
@@ -41,7 +27,6 @@ const Plane  = function(color,x,z,w,h,v) {
 		else  this.obj.scale.set(2,2,)
 		Game.global.scene.add(this.obj)
 	       }
-
 const Box  = function(color,x,y,z,w,h,d) {
 		this.geometry = new THREE.BoxGeometry();
 		switch( color )  {
@@ -74,6 +59,7 @@ const Obj = function(type,obj,items) {
 }
 
 
+
 //structure
 const Movie        = {
 	el : document.getElementById('movie')
@@ -88,7 +74,6 @@ const Menu         = {
 		Select_car.el.style.zIndex = 1;
 		}
 	})
-
 const Select_car   = {
 	el : document.getElementById('select_car')
 }
@@ -109,11 +94,9 @@ const Select_car   = {
 		Select_map.el.style.zIndex = 1
 	}
 	})
-
 const Select_map = {
 	el :document.getElementById('select_map')
 }
-	
 	Select_map.el.addEventListener( "click", function(event) {
 	switch (event.target.id){
 		case "nature" : {
@@ -138,7 +121,13 @@ const Select_map = {
 		Movie.el.style.zIndex = 1
 		Game.backload.load()
 		let load = setInterval( ()=>{
-			if( Game.backload.model.green !== undefined ) {
+			if( Game.backload.model.green   !== undefined &&
+			    Game.backload.model.brown   !== undefined &&
+			    Game.backload.model.green_a !== undefined &&
+			    Game.backload.model.green_b !== undefined &&
+			    Game.backload.model.black_a !== undefined && 
+			    Game.backload.model.black_b !== undefined &&
+			    Game.backload.model.black_c !== undefined     ) {
 				clearInterval(load)
 				Game.load()
 			}
@@ -820,72 +809,68 @@ Game.load = async function (){
 Game.backload = {
 	model : {},
 	load  : function() {
+		let name
 		switch (Game.global.actual.map){
-			case "nature" : {
-																		//!!REVERS AFTER TESTING!
-
-				loader_black_a.load( '/src/black_a_n.glb',  function ( gltf ) {
-					let model = gltf.scene;
-					model.scale.set(1, 0.6, 0.6)
-					model.traverse( function ( object ) {
-						if ( object.isMesh ) object.castShadow = true;
-					} );
-					Game.backload.model.black_a = model
-				})
-				loader_black_b.load( '/src/black_b_n.glb',  function ( gltf ) {
-					let model = gltf.scene;
-					model.scale.set(0.6, 0.4, 0.4)
-					model.traverse( function ( object ) {
-						if ( object.isMesh ) object.castShadow = true;
-					} );
-					Game.backload.model.black_b = model
-				})
-				loader_black_c.load( '/src/black_c_n.glb',  function ( gltf ) {
-					let model = gltf.scene;
-					model.scale.set(1, 1, 1)
-					model.traverse( function ( object ) {
-						if ( object.isMesh ) object.castShadow = true;
-					} );
-					Game.backload.model.black_c = model
-				})
-				loader_green_b.load( '/src/green_b_n.glb',  function ( gltf ) {
-					let model = gltf.scene;
-					model.scale.set(0.3, 0.3, 0.5)
-					model.traverse( function ( object ) {
-						if ( object.isMesh ) object.castShadow = true;
-					} );
-					Game.backload.model.green_b = model
-				})
-				loader_green_a.load( '/src/green_a_n.glb',  function ( gltf ) {
-					let model = gltf.scene;
-					model.scale.set(0.5, 0.5, 0.5)
-					model.traverse( function ( object ) {
-						if ( object.isMesh ) object.castShadow = true;
-					} );
-					Game.backload.model.green_a = model
-				})
-				loader_brown.load( '/src/brown_n.glb',  function ( gltf ) {
-					let model = gltf.scene;
-					model.scale.set(1, 0.25, 1)
-					model.traverse( function ( object ) {
-						if ( object.isMesh ) object.castShadow = true;
-					} );
-					Game.backload.model.brown = model
-				})
-				loader_green.load( '/src/green_n.glb',  function ( gltf ) {
-					let model = gltf.scene;
-					model.scale.set(1, 0.25, 1)
-					model.traverse( function ( object ) {
-						if ( object.isMesh ) object.castShadow = true;
-					} );
-					Game.backload.model.green = model
-				})
-				}break;
-			case "city" : {
-				}break;
-			case "cyber" : {
-				}break;
+			case "nature" : name = "n";  break;
+			case "city"   : name = "ci"; break;
+			case "cyber"  : name = "cy";  break;
 		}
+		loader_green.load( '/src/green_'+name+'.glb',  function ( gltf ) {
+				let model = gltf.scene;
+				model.scale.set(1, 0.25, 1)
+				model.traverse( function ( object ) {
+					if ( object.isMesh ) object.castShadow = true;
+				} );
+				Game.backload.model.green = model
+		})
+		loader_brown.load( '/src/brown_'+name+'.glb',  function ( gltf ) {
+				let model = gltf.scene;
+				model.scale.set(1, 0.25, 1)
+				model.traverse( function ( object ) {
+					if ( object.isMesh ) object.castShadow = true;
+				} );
+				Game.backload.model.brown = model
+		})		
+		loader_black_a.load( '/src/black_a_'+name+'.glb',  function ( gltf ) {
+				let model = gltf.scene;
+				model.scale.set(1, 0.6, 0.6)
+				model.traverse( function ( object ) {
+					if ( object.isMesh ) object.castShadow = true;
+				} );
+				Game.backload.model.black_a = model
+		})
+		loader_black_b.load( '/src/black_b_'+name+'.glb',  function ( gltf ) {
+				let model = gltf.scene;
+				model.scale.set(0.6, 0.4, 0.4)
+				model.traverse( function ( object ) {
+					if ( object.isMesh ) object.castShadow = true;
+				} );
+				Game.backload.model.black_b = model
+		})
+		loader_black_c.load( '/src/black_c_'+name+'.glb',  function ( gltf ) {
+				let model = gltf.scene;
+				model.scale.set(1, 1, 1)
+				model.traverse( function ( object ) {
+					if ( object.isMesh ) object.castShadow = true;
+				} );
+				Game.backload.model.black_c = model
+		})
+		loader_green_a.load( '/src/green_a_'+name+'.glb',  function ( gltf ) {
+				let model = gltf.scene;
+				model.scale.set(0.5, 0.5, 0.5)
+				model.traverse( function ( object ) {
+					if ( object.isMesh ) object.castShadow = true;
+				} );
+				Game.backload.model.green_a = model
+		})	
+		loader_green_b.load( '/src/green_b_'+name+'.glb',  function ( gltf ) {
+				let model = gltf.scene;
+				model.scale.set(0.3, 0.3, 0.5)
+				model.traverse( function ( object ) {
+					if ( object.isMesh ) object.castShadow = true;
+				} );
+				Game.backload.model.green_b = model
+		})
 	}
 }
 
@@ -976,4 +961,20 @@ let check = setInterval( function () {
 		Nav.speed.el.innerHTML = ""+Game.local.speed
 	} 
 },50)
+
+const loader_green      = new GLTFLoader();
+const loader_brown      = new GLTFLoader();
+const loader_green_a    = new GLTFLoader();
+const loader_green_b    = new GLTFLoader();
+const loader_black_a    = new GLTFLoader();
+const loader_black_b    = new GLTFLoader();
+const loader_black_c    = new GLTFLoader();
+
+const loader_car_red    = new GLTFLoader();
+const loader_car_anim_a = new GLTFLoader();
+const loader_car_anim_b = new GLTFLoader();
+const loader_car_anim_c = new GLTFLoader();
+const loader_car_anim_s = new GLTFLoader();
+const clock = new THREE.Clock();
+
 //system
