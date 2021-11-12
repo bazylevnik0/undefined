@@ -1,5 +1,5 @@
-import * as THREE from "/build/three.module.js" 
-import { GLTFLoader } from '/build/GLTFLoader.js';
+import * as THREE from "/three.module.js" 
+import { GLTFLoader } from '/GLTFLoader.js';
 		
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
@@ -323,7 +323,7 @@ const Game         = {}
 	    Game.global.car.build = function() {
 			function download(){
 			return new Promise ((resolve, reject) => {
-					loader_car_red.load( '/src/car_'+Game.global.actual.car+'.glb',  function ( gltf ) {
+					loader_car_red.load( 'car_'+Game.global.actual.car+'.glb',  function ( gltf ) {
 						let model = gltf.scene;
 						model.scale.set(0.5, 0.4, 0.6)
 						model.traverse( function ( object ) {
@@ -391,7 +391,7 @@ const Game         = {}
 						temp_length = 2;
 					}break;
 				}
-				temp_loader.load( '/src/anim_' + temp[i] +'.glb',  function ( gltf ) {
+				temp_loader.load( 'anim_' + temp[i] +'.glb',  function ( gltf ) {
 					let model = gltf.scene;
 					model.scale.set(0.5, 0.4, 0.6)
 					model.traverse( function ( object ) {
@@ -815,7 +815,7 @@ Game.backload = {
 			case "city"   : name = "ci"; break;
 			case "cyber"  : name = "cy";  break;
 		}
-		loader_green.load( '/src/green_'+name+'.glb',  function ( gltf ) {
+		loader_green.load( 'green_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(1, 0.25, 1)
 				model.traverse( function ( object ) {
@@ -823,7 +823,7 @@ Game.backload = {
 				} );
 				Game.backload.model.green = model
 		})
-		loader_brown.load( '/src/brown_'+name+'.glb',  function ( gltf ) {
+		loader_brown.load( 'brown_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(1, 0.25, 1)
 				model.traverse( function ( object ) {
@@ -831,7 +831,7 @@ Game.backload = {
 				} );
 				Game.backload.model.brown = model
 		})		
-		loader_black_a.load( '/src/black_a_'+name+'.glb',  function ( gltf ) {
+		loader_black_a.load( 'black_a_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(1, 0.6, 0.6)
 				model.traverse( function ( object ) {
@@ -839,7 +839,7 @@ Game.backload = {
 				} );
 				Game.backload.model.black_a = model
 		})
-		loader_black_b.load( '/src/black_b_'+name+'.glb',  function ( gltf ) {
+		loader_black_b.load( 'black_b_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(0.6, 0.4, 0.4)
 				model.traverse( function ( object ) {
@@ -847,7 +847,7 @@ Game.backload = {
 				} );
 				Game.backload.model.black_b = model
 		})
-		loader_black_c.load( '/src/black_c_'+name+'.glb',  function ( gltf ) {
+		loader_black_c.load( 'black_c_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(1, 1, 1)
 				model.traverse( function ( object ) {
@@ -855,7 +855,7 @@ Game.backload = {
 				} );
 				Game.backload.model.black_c = model
 		})
-		loader_green_a.load( '/src/green_a_'+name+'.glb',  function ( gltf ) {
+		loader_green_a.load( 'green_a_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(0.5, 0.5, 0.5)
 				model.traverse( function ( object ) {
@@ -863,7 +863,7 @@ Game.backload = {
 				} );
 				Game.backload.model.green_a = model
 		})	
-		loader_green_b.load( '/src/green_b_'+name+'.glb',  function ( gltf ) {
+		loader_green_b.load( 'green_b_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(0.3, 0.3, 0.5)
 				model.traverse( function ( object ) {
