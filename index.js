@@ -603,7 +603,7 @@ const Game         = {}
 					}
 				}
 				//add black a				
-				let seed_a = Math.floor(Math.random()*50)
+				let seed_a = Math.floor(Math.random()*10)
 				if(Game.local.ground.move.direction !== "straight") seed_a = 1
 				if  (seed_a == 0) {
 					let seed_a_dir = Math.floor(Math.random()*15)
