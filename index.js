@@ -116,7 +116,17 @@ const Select_map = {
 		Game.global.actual.film = Game.global.actual.map
 		Select_map.el.style.zIndex = -1
 		Movie.obj = new Image(); 
-		Movie.obj.src = 'image1.png';
+		switch ( Game.global.actual.map) {
+			case "nature" : {
+				Movie.obj.src = 'src/movie_n.gif';
+			}break;
+			case "city" :{
+				Movie.obj.src = 'src/movie_ci.gif';
+			}break;
+			case "cyber":{
+				Movie.obj.src = 'src/movie_cy.gif';
+			}break;
+		}	
 		Movie.el.appendChild(Movie.obj)
 		Movie.el.style.zIndex = 1
 		Game.backload.load()
@@ -129,10 +139,10 @@ const Select_map = {
 			    Game.backload.model.black_b !== undefined &&
 			    Game.backload.model.black_c !== undefined     ) {
 				clearInterval(load)
-				Game.load()
 			}
 		},100)
 		setTimeout( ()=> {
+			Game.load()
 			let timer = setInterval( ()=>{
 				if( Game.global.status == true) {
 					Movie.el.style.zIndex = -1
@@ -140,7 +150,7 @@ const Select_map = {
 					Nav.el.style.zIndex = 2;
 				}
 			},100)
-		},1000)
+		},10000)
 	}
 	})
 
