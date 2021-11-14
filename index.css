@@ -2,6 +2,7 @@ body {
 	margin: 0;
 	background-color : gray;
 	overflow : hidden;
+	background-image: url("src/back.gif");
 }
 
 #canvas {
@@ -21,9 +22,8 @@ table{
 	bottom: 0;
 	left: 0;
 	right: 0;
+	
 }
-
-
 td{
 	text-align: center;
 }
@@ -35,11 +35,12 @@ img{
 
 .screen {
 	z-index : -1;
-	background-color: green;
+	background-color: transparent;
 	position: fixed;
 	width: 100%!important;
 	height: 100%!important;
 	text-align:center;
+
 }
 #menu {
        z-index : 1;
@@ -78,3 +79,16 @@ img{
 	text-align: center;
 	color: white;
 }
+
+#text{
+	z-index: 0;
+}
+.glitch_a{
+	text-align: left;
+	z-index: inherit;
+}
+.glitch_b{
+	text-align: right;
+	z-index: inherit;
+}
+
