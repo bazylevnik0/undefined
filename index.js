@@ -6,10 +6,10 @@ const Plane  = function(color,x,z,w,h,v) {
 		this.geometry = new THREE.PlaneGeometry();
 		switch( color )  {
 			case "brown" : {
-				this.material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+				this.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
 			}break; 
 			case "green" : {
-				this.material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+				this.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
 			}break; 
 			case "black" : {
 				this.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
@@ -721,10 +721,22 @@ const Game         = {}
 	//sk
 	Game.local.sky = {
 		geometry : new THREE.PlaneGeometry(),
-		material : new THREE.MeshBasicMaterial( { color: 0x0000ff } )
+		material : new THREE.MeshBasicMaterial( { color: 0xffffff
+ } )
 	}
 		Game.local.sky.build = function() {
-			Game.local.sky.obj = new THREE.Mesh( Game.local.sky.geometry , Game.local.sky.material )	
+			Game.local.sky.obj = new THREE.Mesh( Game.local.sky.geometry , Game.local.sky.material )
+			switch( Game.global.actual.map ) {
+				case "nature" : {
+					Game.local.sky.obj.material.map = loader_texture.load( "/src/sky_n.png"  )
+				} break;	
+				case "city" : {
+					Game.local.sky.obj.material.map = loader_texture.load( "/src/sky_ci.png"  )
+				} break;	
+				case "cyber" : {
+					Game.local.sky.obj.material.map = loader_texture.load( "/src/sky_cy.png"  )
+				} break;
+			}	
 			Game.local.sky.obj.name = "sky"
 			Game.local.sky.obj.position.z = -16
 			Game.local.sky.obj.scale.set(150,150,)
@@ -733,7 +745,7 @@ const Game         = {}
 	//ou
 	Game.local.out = {
 		geometry : new THREE.PlaneGeometry(),
-		material : new THREE.MeshBasicMaterial( { color: 0xffff00 } )
+		material : new THREE.MeshBasicMaterial( { color: 0x000000 } )
 	}
 		Game.local.out.build = function() {
 			Game.local.out.obj = new THREE.Mesh( Game.local.out.geometry , Game.local.out.material )	
@@ -961,6 +973,8 @@ let check = setInterval( function () {
 		Nav.speed.el.innerHTML = ""+Game.local.speed
 	} 
 },50)
+
+const loader_texture        = new THREE.TextureLoader();
 
 const loader_green      = new GLTFLoader();
 const loader_brown      = new GLTFLoader();
