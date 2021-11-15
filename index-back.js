@@ -1,5 +1,5 @@
 import * as THREE     from "/build/three.module.js" 
-import { GLTFLoader } from "/build/GLTFLoader.js";
+import { GLTFLoader } from '/build/GLTFLoader.js';
 		
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
@@ -130,25 +130,27 @@ const Select_map = {
 		Movie.el.appendChild(Movie.obj)
 		Movie.el.style.zIndex = 1
 		Game.backload.load()
-		Movie.obj.addEventListener("load",()=>{
-			setTimeout( ()=> {
-				Game.load()
-				let timer = setInterval( ()=>{
-					if( Game.backload.model.green   !== undefined &&
-				    	    Game.backload.model.brown   !== undefined &&
-				    	    Game.backload.model.green_a !== undefined &&
-				    	    Game.backload.model.green_b !== undefined &&
-				    	    Game.backload.model.black_a !== undefined && 
-				    	    Game.backload.model.black_b !== undefined &&
-				    	    Game.backload.model.black_c !== undefined    ) {
-						Game.global.status = true
-						Movie.el.style.zIndex = -1
-						canvas.style.zIndex = 1
-						Nav.el.style.zIndex = 2;
-					}
-				},100)
-			},10000)
-		})
+		let load = setInterval( ()=>{
+			if( Game.backload.model.green   !== undefined &&
+			    Game.backload.model.brown   !== undefined &&
+			    Game.backload.model.green_a !== undefined &&
+			    Game.backload.model.green_b !== undefined &&
+			    Game.backload.model.black_a !== undefined && 
+			    Game.backload.model.black_b !== undefined &&
+			    Game.backload.model.black_c !== undefined     ) {
+				clearInterval(load)
+			}
+		},100)
+		setTimeout( ()=> {
+			Game.load()
+			let timer = setInterval( ()=>{
+				if( Game.global.status == true) {
+					Movie.el.style.zIndex = -1
+					canvas.style.zIndex = 1
+					Nav.el.style.zIndex = 2;
+				}
+			},100)
+		},10000)
 	}
 	})
 
@@ -331,7 +333,7 @@ const Game         = {}
 	    Game.global.car.build = function() {
 			function download(){
 			return new Promise ((resolve, reject) => {
-					loader_car_red.load( 'src/car_'+Game.global.actual.car+'.glb',  function ( gltf ) {
+					loader_car_red.load( '/src/car_'+Game.global.actual.car+'.glb',  function ( gltf ) {
 						let model = gltf.scene;
 						model.scale.set(0.5, 0.4, 0.6)
 						model.traverse( function ( object ) {
@@ -399,7 +401,7 @@ const Game         = {}
 						temp_length = 2;
 					}break;
 				}
-				temp_loader.load( 'src/anim_' + temp[i] +'.glb',  function ( gltf ) {
+				temp_loader.load( '/src/anim_' + temp[i] +'.glb',  function ( gltf ) {
 					let model = gltf.scene;
 					model.scale.set(0.5, 0.4, 0.6)
 					model.traverse( function ( object ) {
@@ -417,7 +419,9 @@ const Game         = {}
 							temp_obj.actions[j] = temp_obj.mixer.clipAction( temp_obj.arr[ j ] );
 						}
 						temp_obj.actions.forEach( el=> {
+							//el.loop = THREE.LoopOnce
 							el.clampWhenFinished   = true
+							//el.reset().play()
 						})
 					
 						Game.global.scene.add( temp_obj.obj )
@@ -734,13 +738,13 @@ const Game         = {}
 			Game.local.sky.obj = new THREE.Mesh( Game.local.sky.geometry , Game.local.sky.material )
 			switch( Game.global.actual.map ) {
 				case "nature" : {
-					Game.local.sky.obj.material.map = loader_texture.load( "src/sky_n.jpg"  )
+					Game.local.sky.obj.material.map = loader_texture.load( "/src/sky_n.png"  )
 				} break;	
 				case "city" : {
-					Game.local.sky.obj.material.map = loader_texture.load( "src/sky_ci.png"  )
+					Game.local.sky.obj.material.map = loader_texture.load( "/src/sky_ci.png"  )
 				} break;	
 				case "cyber" : {
-					Game.local.sky.obj.material.map = loader_texture.load( "src/sky_cy.png"  )
+					Game.local.sky.obj.material.map = loader_texture.load( "/src/sky_cy.png"  )
 				} break;
 			}	
 			Game.local.sky.obj.name = "sky"
@@ -819,6 +823,7 @@ Game.load = async function (){
 		if(Game.global.car.loaded == true) {
 			clearInterval(timer)
 			Game.animate()
+			Game.global.status = true
 		}
 	},500)
 }
@@ -832,7 +837,7 @@ Game.backload = {
 			case "city"   : name = "ci"; break;
 			case "cyber"  : name = "cy";  break;
 		}
-		loader_green.load( 'src/green_'+name+'.glb',  function ( gltf ) {
+		loader_green.load( '/src/green_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(1, 0.25, 1)
 				model.traverse( function ( object ) {
@@ -840,7 +845,7 @@ Game.backload = {
 				} );
 				Game.backload.model.green = model
 		})
-		loader_brown.load( 'src/brown_'+name+'.glb',  function ( gltf ) {
+		loader_brown.load( '/src/brown_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(1, 0.25, 1)
 				model.traverse( function ( object ) {
@@ -848,7 +853,7 @@ Game.backload = {
 				} );
 				Game.backload.model.brown = model
 		})		
-		loader_black_a.load( 'src/black_a_'+name+'.glb',  function ( gltf ) {
+		loader_black_a.load( '/src/black_a_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(1, 0.6, 0.6)
 				model.traverse( function ( object ) {
@@ -856,7 +861,7 @@ Game.backload = {
 				} );
 				Game.backload.model.black_a = model
 		})
-		loader_black_b.load( 'src/black_b_'+name+'.glb',  function ( gltf ) {
+		loader_black_b.load( '/src/black_b_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(0.6, 0.4, 0.4)
 				model.traverse( function ( object ) {
@@ -864,7 +869,7 @@ Game.backload = {
 				} );
 				Game.backload.model.black_b = model
 		})
-		loader_black_c.load( 'src/black_c_'+name+'.glb',  function ( gltf ) {
+		loader_black_c.load( '/src/black_c_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(1, 1, 1)
 				model.traverse( function ( object ) {
@@ -872,7 +877,7 @@ Game.backload = {
 				} );
 				Game.backload.model.black_c = model
 		})
-		loader_green_a.load( 'src/green_a_'+name+'.glb',  function ( gltf ) {
+		loader_green_a.load( '/src/green_a_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(0.5, 0.5, 0.5)
 				model.traverse( function ( object ) {
@@ -880,7 +885,7 @@ Game.backload = {
 				} );
 				Game.backload.model.green_a = model
 		})	
-		loader_green_b.load( 'src/green_b_'+name+'.glb',  function ( gltf ) {
+		loader_green_b.load( '/src/green_b_'+name+'.glb',  function ( gltf ) {
 				let model = gltf.scene;
 				model.scale.set(0.3, 0.3, 0.5)
 				model.traverse( function ( object ) {
@@ -996,60 +1001,4 @@ const loader_car_anim_c = new GLTFLoader();
 const loader_car_anim_s = new GLTFLoader();
 const clock = new THREE.Clock();
 
-//+
-//mobile
-let mobile = document.getElementById("mobile")
-if (window.screen.width < 1440) {
-     let timer = setInterval( function() {
-		if(Game.global.status == true){	
-   			mobile.style.display = "block"
-			clearInterval(timer)
-
-			document.addEventListener("click" , function(event){
-				if (Game.global.status == true) {
-					switch (event.target.id) {
-						case "left"  : {
-							Game.global.car.obj.rotation.y = (-15*Math.PI)/180
-							Game.global.car.obj.position.x -= 2.5
-						} break;
-						case "right" : {
-							Game.global.car.obj.rotation.y = (15*Math.PI)/180
-							Game.global.car.obj.position.x += 2.5 
-						} break;
-						default : {
-							Game.local.speed += 0.75
-							Game.global.car.obj.position.z -= 0.1
-							if(Game.global.car.obj.position.z < 3.0) {
-								Game.global.car.obj.position.z += 0.1
-								Game.local.speed -= 0.75
-							}
-						}
-					}
-				setTimeout(()=>{ Game.global.car.obj.rotation.y = 0 },250)
-				}
-			})
-		}
-     },100)
-}
-
-//fullscreen
-document.addEventListener("click", function(e) {
-    if (Game.global.status == false) {
-    	toggleFullScreen();
-    }
-}, false);
-
-function toggleFullScreen() {
-  if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-  } 
-}
-
-//resize
-window.onresize = function () {
-	if (Game.global.status == true) {
-		Game.global.camera.aspect = window.innerWidth / window.innerHeight;
-		Game.global.camera.updateProjectionMatrix();
-		Game.global.renderer.setSize( window.innerWidth, window.innerHeight );
-	}
-};
+//system
