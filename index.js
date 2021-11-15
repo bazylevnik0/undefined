@@ -1,15 +1,15 @@
-import * as THREE from "/undefined/three.module.js" 
-import { GLTFLoader } from '/undefined/GLTFLoader.js';
+import * as THREE     from "/three.module.js" 
+import { GLTFLoader } from "/GLTFLoader.js";
 		
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
 		this.geometry = new THREE.PlaneGeometry();
 		switch( color )  {
 			case "brown" : {
-				this.material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+				this.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
 			}break; 
 			case "green" : {
-				this.material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+				this.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
 			}break; 
 			case "black" : {
 				this.material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
@@ -116,31 +116,39 @@ const Select_map = {
 		Game.global.actual.film = Game.global.actual.map
 		Select_map.el.style.zIndex = -1
 		Movie.obj = new Image(); 
-		Movie.obj.src = 'image1.png';
+		switch ( Game.global.actual.map) {
+			case "nature" : {
+				Movie.obj.src = 'movie_n.gif';
+			}break;
+			case "city" :{
+				Movie.obj.src = 'movie_ci.gif';
+			}break;
+			case "cyber":{
+				Movie.obj.src = 'movie_cy.gif';
+			}break;
+		}	
 		Movie.el.appendChild(Movie.obj)
 		Movie.el.style.zIndex = 1
 		Game.backload.load()
-		let load = setInterval( ()=>{
-			if( Game.backload.model.green   !== undefined &&
-			    Game.backload.model.brown   !== undefined &&
-			    Game.backload.model.green_a !== undefined &&
-			    Game.backload.model.green_b !== undefined &&
-			    Game.backload.model.black_a !== undefined && 
-			    Game.backload.model.black_b !== undefined &&
-			    Game.backload.model.black_c !== undefined     ) {
-				clearInterval(load)
+		Movie.obj.addEventListener("load",()=>{
+			setTimeout( ()=> {
 				Game.load()
-			}
-		},100)
-		setTimeout( ()=> {
-			let timer = setInterval( ()=>{
-				if( Game.global.status == true) {
-					Movie.el.style.zIndex = -1
-					canvas.style.zIndex = 1
-					Nav.el.style.zIndex = 2;
-				}
-			},100)
-		},1000)
+				let timer = setInterval( ()=>{
+					if( Game.backload.model.green   !== undefined &&
+				    	    Game.backload.model.brown   !== undefined &&
+				    	    Game.backload.model.green_a !== undefined &&
+				    	    Game.backload.model.green_b !== undefined &&
+				    	    Game.backload.model.black_a !== undefined && 
+				    	    Game.backload.model.black_b !== undefined &&
+				    	    Game.backload.model.black_c !== undefined    ) {
+						Game.global.status = true
+						Movie.el.style.zIndex = -1
+						canvas.style.zIndex = 1
+						Nav.el.style.zIndex = 2;
+					}
+				},100)
+			},10000)
+		})
 	}
 	})
 
@@ -409,9 +417,7 @@ const Game         = {}
 							temp_obj.actions[j] = temp_obj.mixer.clipAction( temp_obj.arr[ j ] );
 						}
 						temp_obj.actions.forEach( el=> {
-							//el.loop = THREE.LoopOnce
 							el.clampWhenFinished   = true
-							//el.reset().play()
 						})
 					
 						Game.global.scene.add( temp_obj.obj )
@@ -721,10 +727,22 @@ const Game         = {}
 	//sk
 	Game.local.sky = {
 		geometry : new THREE.PlaneGeometry(),
-		material : new THREE.MeshBasicMaterial( { color: 0x0000ff } )
+		material : new THREE.MeshBasicMaterial( { color: 0xffffff
+ } )
 	}
 		Game.local.sky.build = function() {
-			Game.local.sky.obj = new THREE.Mesh( Game.local.sky.geometry , Game.local.sky.material )	
+			Game.local.sky.obj = new THREE.Mesh( Game.local.sky.geometry , Game.local.sky.material )
+			switch( Game.global.actual.map ) {
+				case "nature" : {
+					Game.local.sky.obj.material.map = loader_texture.load( "sky_n.jpg"  )
+				} break;	
+				case "city" : {
+					Game.local.sky.obj.material.map = loader_texture.load( "sky_ci.png"  )
+				} break;	
+				case "cyber" : {
+					Game.local.sky.obj.material.map = loader_texture.load( "sky_cy.png"  )
+				} break;
+			}	
 			Game.local.sky.obj.name = "sky"
 			Game.local.sky.obj.position.z = -16
 			Game.local.sky.obj.scale.set(150,150,)
@@ -733,7 +751,7 @@ const Game         = {}
 	//ou
 	Game.local.out = {
 		geometry : new THREE.PlaneGeometry(),
-		material : new THREE.MeshBasicMaterial( { color: 0xffff00 } )
+		material : new THREE.MeshBasicMaterial( { color: 0x000000 } )
 	}
 		Game.local.out.build = function() {
 			Game.local.out.obj = new THREE.Mesh( Game.local.out.geometry , Game.local.out.material )	
@@ -801,7 +819,6 @@ Game.load = async function (){
 		if(Game.global.car.loaded == true) {
 			clearInterval(timer)
 			Game.animate()
-			Game.global.status = true
 		}
 	},500)
 }
@@ -962,6 +979,8 @@ let check = setInterval( function () {
 	} 
 },50)
 
+const loader_texture        = new THREE.TextureLoader();
+
 const loader_green      = new GLTFLoader();
 const loader_brown      = new GLTFLoader();
 const loader_green_a    = new GLTFLoader();
@@ -977,4 +996,61 @@ const loader_car_anim_c = new GLTFLoader();
 const loader_car_anim_s = new GLTFLoader();
 const clock = new THREE.Clock();
 
-//system
+//+
+//mobile
+console.log(window.screen)
+let mobile = document.getElementById("mobile")
+if (window.screen.width < 1440) {
+     let timer = setInterval( function() {
+		if(Game.global.status == true){	
+   			mobile.style.display = "block"
+			clearInterval(timer)
+
+			document.addEventListener("click" , function(event){
+				if (Game.global.status == true) {
+					switch (event.target.id) {
+						case "left"  : {
+							Game.global.car.obj.rotation.y = (-15*Math.PI)/180
+							Game.global.car.obj.position.x -= 2.5
+						} break;
+						case "right" : {
+							Game.global.car.obj.rotation.y = (15*Math.PI)/180
+							Game.global.car.obj.position.x += 2.5 
+						} break;
+						default : {
+							Game.local.speed += 0.75
+							Game.global.car.obj.position.z -= 0.1
+							if(Game.global.car.obj.position.z < 3.0) {
+								Game.global.car.obj.position.z += 0.1
+								Game.local.speed -= 0.75
+							}
+						}
+					}
+				setTimeout(()=>{ Game.global.car.obj.rotation.y = 0 },250)
+				}
+			})
+		}
+     },100)
+}
+
+//fullscreen
+document.addEventListener("click", function(e) {
+    if (Game.global.status == false) {
+    	toggleFullScreen();
+    }
+}, false);
+
+function toggleFullScreen() {
+  if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+  } 
+}
+
+//resize
+window.onresize = function () {
+	if (Game.global.status == true) {
+		Game.global.camera.aspect = window.innerWidth / window.innerHeight;
+		Game.global.camera.updateProjectionMatrix();
+		Game.global.renderer.setSize( window.innerWidth, window.innerHeight );
+	}
+};
