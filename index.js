@@ -147,7 +147,7 @@ const Select_map = {
 						Nav.el.style.zIndex = 2;
 					}
 				},100)
-			},10000)
+			},1000)
 		})
 	}
 	})
@@ -1045,11 +1045,9 @@ function toggleFullScreen() {
   } 
 }
 
-//resize
-window.onresize = function () {
-	if (Game.global.status == true) {
-		Game.global.camera.aspect = window.innerWidth / window.innerHeight;
-		Game.global.camera.updateProjectionMatrix();
-		Game.global.renderer.setSize( window.innerWidth, window.innerHeight );
-	}
-};
+//orientation
+var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
+
+if (orientation !== "landscape-primary") {
+  alert("plz rotate screen(landscape mode)");
+} 
