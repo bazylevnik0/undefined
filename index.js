@@ -167,11 +167,12 @@ const Nav	   ={
 }
 
 const Game         = {}
+    //renderer
+    //composer
     /*Game
 	  canvas
 		el
 		ctx
-	  renderer
 	  animate()
 
 	  global.
