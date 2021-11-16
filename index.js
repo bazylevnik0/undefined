@@ -1,6 +1,10 @@
-import * as THREE     from "/build/three.module.js" 
-import { GLTFLoader } from "/build/GLTFLoader.js";
-		
+import * as THREE         from "/build/three.module.js" 
+import { GLTFLoader }     from "/build/GLTFLoader.js";
+import { EffectComposer } from '/build/EffectComposer.js';
+import { RenderPass }     from '/build/RenderPass.js';
+import { GlitchPass }     from '/build/GlitchPass.js';
+
+
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
 		this.geometry = new THREE.PlaneGeometry();
@@ -229,8 +233,10 @@ const Game         = {}
       Game.canvas = {}
       Game.canvas.el = document.getElementById("canvas")
       Game.canvas.ctx = Game.canvas.el.getContext("webgl") 
-      Game.renderer = new THREE.WebGLRenderer( { canvas: Game.canvas.el } );
-      Game.renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
+	//
+      //Game.renderer = new THREE.WebGLRenderer( { canvas: Game.canvas.el } );
+      //Game.renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
+	//
       Game.animate = function () {
 	requestAnimationFrame( Game.animate );
 	let mixerUpdateDelta = clock.getDelta();
@@ -239,7 +245,8 @@ const Game         = {}
 	Game.global.car.animation.action.a_b.mixer !== undefined ? Game.global.car.animation.action.a_b.mixer.update( mixerUpdateDelta ) : false
 	Game.global.car.animation.action.a_c.mixer !== undefined ? Game.global.car.animation.action.a_c.mixer.update( mixerUpdateDelta ) : false
 	Game.global.car.animation.action.a_s.mixer !== undefined ? Game.global.car.animation.action.a_s.mixer.update( mixerUpdateDelta ) : false
-	Game.renderer.render( Game.global.scene, Game.global.camera );
+	composer.render()
+	//Game.renderer.render( Game.global.scene, Game.global.camera );
       };
 
       Game.global = {
@@ -263,6 +270,18 @@ const Game         = {}
 	 Game.global.light.point = new THREE.PointLight( 0xffffff, 1, 100 );
 	 Game.global.light.point.position.set( 0, 20, 10 );
 	 Game.global.scene.add( Game.global.light.ambient , Game.global.light.point );
+
+	var renderer = new THREE.WebGLRenderer( { canvas: Game.canvas.el } );
+     	    renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
+
+	var glitchPass
+	    glitchPass = new GlitchPass();
+	    glitchPass.goWild = true;
+
+	var composer
+	    composer = new EffectComposer( renderer );
+	    composer.addPass( new RenderPass( Game.global.scene, Game.global.camera ) );
+	    composer.addPass( glitchPass );
 		
          Game.global.car = {
 		geometry : new THREE.BoxGeometry(),
@@ -1051,3 +1070,5 @@ var orientation = (screen.orientation || {}).type || screen.mozOrientation || sc
 if (orientation !== "landscape-primary") {
   alert("plz rotate screen(landscape mode)");
 } 
+
+
