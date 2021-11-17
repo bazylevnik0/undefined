@@ -1,6 +1,10 @@
-import * as THREE     from "/three.module.js" 
-import { GLTFLoader } from "/GLTFLoader.js";
-		
+import * as THREE         from "/three.module.js" 
+import { GLTFLoader }     from "/GLTFLoader.js";
+import { EffectComposer } from '/EffectComposer.js';
+import { RenderPass }     from '/RenderPass.js';
+import { GlitchPass }     from '/GlitchPass.js';
+
+
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
 		this.geometry = new THREE.PlaneGeometry();
@@ -70,7 +74,8 @@ const Menu         = {
 }
 	Menu.el.addEventListener( "click",function(event) {
 	if(event.target.id == "new"){
-		Menu.el.style.zIndex = -1
+		Menu.el.style.zIndex = -1;
+		Menu.el.style.display = "none"
 		Select_car.el.style.zIndex = 1;
 		}
 	})
@@ -131,6 +136,7 @@ const Select_map = {
 		Movie.el.style.zIndex = 1
 		Game.backload.load()
 		Movie.obj.addEventListener("load",()=>{
+			Game.sound.movie.play()
 			setTimeout( ()=> {
 				Game.load()
 				let timer = setInterval( ()=>{
@@ -145,6 +151,8 @@ const Select_map = {
 						Movie.el.style.zIndex = -1
 						canvas.style.zIndex = 1
 						Nav.el.style.zIndex = 2;
+						secret.style.zIndex = 1;
+						Game.sound.music.play()
 					}
 				},100)
 			},10000)
@@ -162,12 +170,14 @@ const Nav	   ={
 	}
 }
 
+//render
+//composer
 const Game         = {}
     /*Game
 	  canvas
 		el
 		ctx
-	  renderer
+	  sound
 	  animate()
 
 	  global.
@@ -229,8 +239,18 @@ const Game         = {}
       Game.canvas = {}
       Game.canvas.el = document.getElementById("canvas")
       Game.canvas.ctx = Game.canvas.el.getContext("webgl") 
-      Game.renderer = new THREE.WebGLRenderer( { canvas: Game.canvas.el } );
-      Game.renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
+
+      Game.sound = {}
+      Game.sound.check = new Audio("check.mp3");
+      Game.sound.music = new Audio("music.wav");
+      Game.sound.movie = new Audio("movie.mp3");
+      Game.sound.crash_a_c = new Audio("crash_a_c.mp3");
+      Game.sound.crash_a_b = new Audio("crash_a_b.mp3");
+      
+      Game.sound.crash_a_b.loop = Game.sound.crash_a_c.loob = false;
+
+
+
       Game.animate = function () {
 	requestAnimationFrame( Game.animate );
 	let mixerUpdateDelta = clock.getDelta();
@@ -239,7 +259,7 @@ const Game         = {}
 	Game.global.car.animation.action.a_b.mixer !== undefined ? Game.global.car.animation.action.a_b.mixer.update( mixerUpdateDelta ) : false
 	Game.global.car.animation.action.a_c.mixer !== undefined ? Game.global.car.animation.action.a_c.mixer.update( mixerUpdateDelta ) : false
 	Game.global.car.animation.action.a_s.mixer !== undefined ? Game.global.car.animation.action.a_s.mixer.update( mixerUpdateDelta ) : false
-	Game.renderer.render( Game.global.scene, Game.global.camera );
+	composer.render()
       };
 
       Game.global = {
@@ -263,6 +283,18 @@ const Game         = {}
 	 Game.global.light.point = new THREE.PointLight( 0xffffff, 1, 100 );
 	 Game.global.light.point.position.set( 0, 20, 10 );
 	 Game.global.scene.add( Game.global.light.ambient , Game.global.light.point );
+
+	var renderer = new THREE.WebGLRenderer( { canvas: Game.canvas.el } );
+     	    renderer.setSize( window.innerWidth/3, window.innerHeight/3 );
+
+	var glitchPass
+	    glitchPass = new GlitchPass();
+	    glitchPass.goWild = true;
+
+	var composer
+	    composer = new EffectComposer( renderer );
+	    composer.addPass( new RenderPass( Game.global.scene, Game.global.camera ) );
+	    composer.addPass( glitchPass );
 		
          Game.global.car = {
 		geometry : new THREE.BoxGeometry(),
@@ -276,11 +308,15 @@ const Game         = {}
 				a_a : {
 					obj : undefined,
 					run : function() {
+						Game.sound.music.pause()
+						Game.sound.music.src = undefined;
+
 						Game.global.car.animation.action.a_a.obj.position.x = Game.global.car.obj.position.x
 						Game.global.car.animation.action.a_a.obj.position.z = Game.global.car.obj.position.z
 						Game.global.car.animation.action.a_a.actions.forEach( el=> el.reset().play() )
 						Game.global.car.animation.actions_loop.forEach( el=>  el.stop())
 						Game.global.car.animation.action.a_s.anim(false)
+
 						let k = 25	
 						let timer = setInterval( function() {	
 							if (k > 0) {
@@ -294,6 +330,7 @@ const Game         = {}
 				a_b : {
 					obj : undefined,
 					run : function() {
+						Game.sound.crash_a_b.play()
 						Game.global.car.animation.action.a_b.obj.position.x = Game.global.car.obj.position.x
 						Game.global.car.animation.action.a_b.obj.position.z = Game.global.car.obj.position.z
 						Game.global.car.animation.action.a_b.actions.forEach( el=> el.play() )
@@ -303,6 +340,7 @@ const Game         = {}
 				a_c : {
 					obj : undefined,
 					run : function() {
+						Game.sound.crash_a_c.play()
 						Game.global.car.animation.action.a_c.obj.position.x = Game.global.car.obj.position.x
 						Game.global.car.animation.action.a_c.obj.position.z = Game.global.car.obj.position.z
 						Game.global.car.animation.action.a_c.actions.forEach( el=> el.play() )
@@ -609,22 +647,24 @@ const Game         = {}
 					}
 				}
 				//add black a				
-				let seed_a = Math.floor(Math.random()*10)
+				let seed_a = Math.floor(Math.random()*100)
 				if(Game.local.ground.move.direction !== "straight") seed_a = 1
 				if  (seed_a == 0) {
-					let seed_a_dir = Math.floor(Math.random()*15)
+					let seed_a_dir = Math.floor(Math.random()*2)
 					switch (seed_a_dir) {
 						case 0 : {					
-							temp[9].obj.material = temp[8].obj.material = temp[7].obj.material = temp[6].obj.material = temp[5].obj.material = temp[4].obj.material = Game.local.ground.model.black.obj.material
-							temp[9].type =	temp[8].type =	temp[7].type =	temp[6].type = temp[5].type = temp[4].type = "black_a"
+							temp[7].obj.material = Game.local.ground.model.black.obj.material
+							temp[7].type = "black_a"
 							temp[7].items.unshift( Game.backload.model.black_a.clone() )
+							temp[7].items[0].position.x = Game.local.ground.move.convert_x(7)
 							temp[7].items[0].position.z = Game.local.ground.move.convert_z(18)
 							Game.global.scene.add( temp[7].items[0] )
 						}break;
 						case 1 : {
-							temp[10].obj.material = temp[11].obj.material = temp[12].obj.material = temp[13].obj.material = temp[14].obj.material = temp[15].obj.material = Game.local.ground.model.black.obj.material
-							temp[10].type =	temp[11].type =	temp[12].type =	temp[13].type = temp[14].type = temp[15].type = "black_a"
+							temp[13].obj.material = Game.local.ground.model.black.obj.material
+							temp[13].type = "black_a"
 							temp[13].items.unshift( Game.backload.model.black_a.clone() )
+							temp[13].items[0].position.x = Game.local.ground.move.convert_x(13)
 							temp[13].items[0].position.z = Game.local.ground.move.convert_z(18)
 							Game.global.scene.add( temp[13].items[0] )
 						}break;
@@ -639,22 +679,20 @@ const Game         = {}
 						case 0 : {					
 							let seed_b_place = Math.floor(Math.random()*8)+4
 							temp[0+seed_b_place].obj.material = Game.local.ground.model.black.obj.material
-							temp[1+seed_b_place].obj.material = Game.local.ground.model.black.obj.material			
-							temp[0+seed_b_place].type =	temp[1+seed_b_place].type = "black_b"
+							temp[0+seed_b_place].type = "black_b"
 							temp[0+seed_b_place].items.unshift( Game.backload.model.black_b.clone() )
-							temp[1+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(1+seed_b_place)
+							temp[0+seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(0+seed_b_place)
 							temp[0+seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
 							Game.global.scene.add(temp[0+seed_b_place].items[0])
 						}break;
 						case 1 : {						
 							let seed_b_place = Math.floor(Math.random()*8)+4
-							temp[18-seed_b_place].obj.material = Game.local.ground.model.black.obj.material
 							temp[17-seed_b_place].obj.material = Game.local.ground.model.black.obj.material
-							temp[18-seed_b_place].type =	temp[17-seed_b_place].type = "black_b"
+							temp[17-seed_b_place].type = "black_b"
 							temp[17-seed_b_place].items.unshift( Game.backload.model.black_b.clone() )
 							temp[17-seed_b_place].items[0].position.x = Game.local.ground.move.convert_x(17-seed_b_place)
+							temp[17-seed_b_place].items[0].position.z = Game.local.ground.move.convert_z(18)
 							Game.global.scene.add(temp[17-seed_b_place].items[0])
-					
 						}break;
 					} 
 				}
@@ -734,7 +772,7 @@ const Game         = {}
 			Game.local.sky.obj = new THREE.Mesh( Game.local.sky.geometry , Game.local.sky.material )
 			switch( Game.global.actual.map ) {
 				case "nature" : {
-					Game.local.sky.obj.material.map = loader_texture.load( "sky_n.jpg"  )
+					Game.local.sky.obj.material.map = loader_texture.load( "sky_n.png"  )
 				} break;	
 				case "city" : {
 					Game.local.sky.obj.material.map = loader_texture.load( "sky_ci.png"  )
@@ -933,9 +971,9 @@ let check = setInterval( function () {
 		if(Game.global.car.obj.position.x < 0) Game.global.car.obj.position.x += 0.1
 		//collisions
 		let actual = Game.global.car.obj.position.x
-		Game.local.ground.data[5].forEach( el=> {
+		Game.local.ground.data[2].forEach( el=> {
 			if(el.type == "black_a"){
-				if( actual > el.obj.position.x - 0.25 &&  actual < el.obj.position.x +0.25) {
+				if( actual > el.obj.position.x - 2.5 &&  actual < el.obj.position.x + 2.5) {
 					console.log("catch_a")
 					Game.global.car.animation.action.a_a.run()
 					Game.local.ground.move.status = false
@@ -943,14 +981,14 @@ let check = setInterval( function () {
 				} 
 			}
 			if(el.type == "black_b"){
-				if( actual > el.obj.position.x - 1.0 &&  actual < el.obj.position.x +1.0) {
+				if( actual > el.obj.position.x - 1.25 &&  actual < el.obj.position.x + 1.25) {
 					console.log("catch_b")	
 					Game.global.car.animation.action.a_b.run()
-					Game.local.speed /= 3
+					Game.local.speed = 0
 				} 
 			}
 			if(el.type == "black_c"){
-				if( actual > el.obj.position.x - 1.25 &&  actual < el.obj.position.x +1.25) {
+				if( actual > el.obj.position.x - 0.75 &&  actual < el.obj.position.x +0.75) {
 					console.log("catch_c")
 					Game.global.car.animation.action.a_c.run()
 					Game.global.score -= 25
@@ -998,7 +1036,6 @@ const clock = new THREE.Clock();
 
 //+
 //mobile
-console.log(window.screen)
 let mobile = document.getElementById("mobile")
 if (window.screen.width < 1440) {
      let timer = setInterval( function() {
@@ -1037,6 +1074,7 @@ if (window.screen.width < 1440) {
 document.addEventListener("click", function(e) {
     if (Game.global.status == false) {
     	toggleFullScreen();
+	Game.sound.check.play();
     }
 }, false);
 
@@ -1046,11 +1084,22 @@ function toggleFullScreen() {
   } 
 }
 
-//resize
-window.onresize = function () {
-	if (Game.global.status == true) {
-		Game.global.camera.aspect = window.innerWidth / window.innerHeight;
-		Game.global.camera.updateProjectionMatrix();
-		Game.global.renderer.setSize( window.innerWidth, window.innerHeight );
-	}
-};
+//orientation
+var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
+
+if (orientation !== "landscape-primary") {
+  alert("plz rotate screen(landscape mode)");
+} 
+
+//secret
+let secret = document.getElementById("secret")
+let key , temp
+let timer = setInterval( function() {
+	let a = String.fromCharCode(+((""+Math.random()).slice(2,)))
+	let b = String.fromCharCode(+((""+Math.random()).slice(2,)))
+	let c = String.fromCharCode(+((""+Math.random()).slice(2,)))
+	key = a + b + c + "<br>"
+	temp = secret.innerHTML
+	if (temp.length > 100) temp = temp.slice(3,)
+	secret.innerHTML = temp + key
+},100)
