@@ -74,7 +74,8 @@ const Menu         = {
 }
 	Menu.el.addEventListener( "click",function(event) {
 	if(event.target.id == "new"){
-		Menu.el.style.zIndex = -1
+		Menu.el.style.zIndex = -1;
+		Menu.el.style.display = "none"
 		Select_car.el.style.zIndex = 1;
 		}
 	})
@@ -150,6 +151,7 @@ const Select_map = {
 						Movie.el.style.zIndex = -1
 						canvas.style.zIndex = 1
 						Nav.el.style.zIndex = 2;
+						secret.style.zIndex = 1;
 						Game.sound.music.play()
 					}
 				},100)
@@ -645,7 +647,7 @@ const Game         = {}
 					}
 				}
 				//add black a				
-				let seed_a = Math.floor(Math.random()*5)
+				let seed_a = Math.floor(Math.random()*100)
 				if(Game.local.ground.move.direction !== "straight") seed_a = 1
 				if  (seed_a == 0) {
 					let seed_a_dir = Math.floor(Math.random()*2)
@@ -1088,3 +1090,17 @@ var orientation = (screen.orientation || {}).type || screen.mozOrientation || sc
 if (orientation !== "landscape-primary") {
   alert("plz rotate screen(landscape mode)");
 } 
+
+//secret
+let secret = document.getElementById("secret")
+let key , temp
+let timer = setInterval( function() {
+	let a = String.fromCharCode(+((""+Math.random()).slice(2,)))
+	let b = String.fromCharCode(+((""+Math.random()).slice(2,)))
+	let c = String.fromCharCode(+((""+Math.random()).slice(2,)))
+	key = a + b + c + "<br>"
+	temp = secret.innerHTML
+	if (temp.length > 100) temp = temp.slice(3,)
+	secret.innerHTML = temp + key
+},100)
+
