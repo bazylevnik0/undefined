@@ -4,7 +4,7 @@ import { EffectComposer } from '/EffectComposer.js';
 import { RenderPass }     from '/RenderPass.js';
 import { GlitchPass }     from '/GlitchPass.js';
 
-
+		
 //constructors
 const Plane  = function(color,x,z,w,h,v) {
 		this.geometry = new THREE.PlaneGeometry();
@@ -527,7 +527,7 @@ const Game         = {}
 			direction : "straight",
 			run : function() {
 				Game.local.ground.move.status = true
-				for (let i = 1; i < 7; i ++) {
+				for (let i = 1; i < 1000; i ++) {
 					let time = Math.random()*5000 + 5000
 					let seed = Math.floor(Math.random()*2)
 					let dir
@@ -971,7 +971,7 @@ let check = setInterval( function () {
 		if(Game.global.car.obj.position.x < 0) Game.global.car.obj.position.x += 0.1
 		//collisions
 		let actual = Game.global.car.obj.position.x
-		Game.local.ground.data[2].forEach( el=> {
+		Game.local.ground.data[3].forEach( el=> {
 			if(el.type == "black_a"){
 				if( actual > el.obj.position.x - 2.5 &&  actual < el.obj.position.x + 2.5) {
 					console.log("catch_a")
@@ -988,7 +988,7 @@ let check = setInterval( function () {
 				} 
 			}
 			if(el.type == "black_c"){
-				if( actual > el.obj.position.x - 0.75 &&  actual < el.obj.position.x +0.75) {
+				if( actual > el.obj.position.x - 0.75 &&  actual < el.obj.position.x + 0.75) {
 					console.log("catch_c")
 					Game.global.car.animation.action.a_c.run()
 					Game.global.score -= 25
