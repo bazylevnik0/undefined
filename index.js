@@ -1,8 +1,8 @@
-import * as THREE         from "/three.module.js" 
-import { GLTFLoader }     from "/GLTFLoader.js";
-import { EffectComposer } from '/EffectComposer.js';
-import { RenderPass }     from '/RenderPass.js';
-import { GlitchPass }     from '/GlitchPass.js';
+import * as THREE         from "/undefined/three.module.js" 
+import { GLTFLoader }     from "/undefined/GLTFLoader.js";
+import { EffectComposer } from '/undefined/EffectComposer.js';
+import { RenderPass }     from '/undefined/RenderPass.js';
+import { GlitchPass }     from '/undefined/GlitchPass.js';
 
 		
 //constructors
