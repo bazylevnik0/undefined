@@ -1,8 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 body {
 	margin: 0;
 	background-color : gray;
 	overflow : hidden;
 	background-image: url("src/back.gif");
+	font-family: 'VT323', monospace;
+	color: white;
+}
+
+body button {
+	font-family: 'VT323', monospace!important;
+	color: gray!important;
 }
 
 #canvas {
